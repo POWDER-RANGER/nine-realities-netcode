@@ -1,0 +1,11 @@
+# robots.txt for Nine Realities Netcode Research
+# https://powder-ranger.github.io/nine-realities-netcode/
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://powder-ranger.github.io/nine-realities-netcode/sitemap.xml
+
+# Crawl-delay (optional, be considerate)
+Crawl-delay: 1
