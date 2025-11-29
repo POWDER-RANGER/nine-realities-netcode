@@ -36,7 +36,7 @@ README.md      - This file
 ### 📄 Interactive Documentation
 
 View the full interactive analysis:
-- **GitHub Pages**: Coming soon (enable in Settings → Pages)
+- **GitHub Pages**: [https://powder-ranger.github.io/nine-realities-netcode/](https://powder-ranger.github.io/nine-realities-netcode/)
 - **Local**: Open `docs/index.html` in your browser
 
 ### 📚 Technical Paper
@@ -96,6 +96,60 @@ This is an open research project. Contributions, corrections, and discussions ar
 If you use this research in your work, please cite:
 
 ```
+
+## 🏗️ Architecture
+
+### N+1 Concurrent Simulations
+
+```mermaid
+flowchart LR
+  subgraph Clients
+    C1[Client 1<br/>Predicted Sim]:::client
+    C2[Client 2<br/>Predicted Sim]:::client
+    Cn[Client N<br/>Predicted Sim]:::client
+  end
+  S[(Server<br/>Authoritative Sim)]:::server
+
+  C1 -- inputs/acks --> S
+  C2 -- inputs/acks --> S
+  Cn -- inputs/acks --> S
+
+  S -- snapshots --> C1
+  S -- snapshots --> C2
+  S -- snapshots --> Cn
+
+  classDef client fill:#1f77b4,stroke:#0d3b66,color:#fff
+  classDef server fill:#2ca02c,stroke:#145214,color:#fff
+```
+
+### Prediction → Rollback → Blend Pipeline
+
+```mermaid
+sequenceDiagram
+  participant Input as Local Input
+  participant Client as Client Sim
+  participant Buffer as Input Buffer
+  participant Server as Server
+  participant Render as Render
+
+  Input->>Client: Apply input at t
+  Client->>Buffer: Store (seq, t, input)
+  Client->>Render: Predict state S_pred(t)
+
+  Client->>Server: Send input seq + timestamp
+  Server->>Server: Authoritative step (tick)
+  Server-->>Client: Snapshot S_auth(Ts), ack last seq
+
+  Client->>Client: Detect divergence Δ = |S_pred - S_auth|
+  alt Δ > threshold
+    Client->>Client: Rollback to snapshot Ts
+    Client->>Client: Replay buffered inputs > Ts
+    Client->>Render: Blend S_corr -> S_vis over N frames
+  else
+    Client->>Render: Continue normal interpolation
+  end
+```
+
 POWDER-RANGER. (2025). Nine Realities Netcode Model: Multi-client state 
 reconciliation in multiplayer game networking. GitHub. 
 https://github.com/POWDER-RANGER/nine-realities-netcode
@@ -103,6 +157,6 @@ https://github.com/POWDER-RANGER/nine-realities-netcode
 
 ## License
 
-Open for educational and research purposes.
+This project is licensed under the MIT License. See LICENSE..
 
 **Built with**: Deep technical analysis, competitive gaming insight, and years of hands-on experience
