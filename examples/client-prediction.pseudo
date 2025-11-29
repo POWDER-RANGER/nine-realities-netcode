@@ -1,0 +1,54 @@
+// CLIENT-SIDE PREDICTION PSEUDOCODE
+// Demonstrates optimistic client simulation with rollback correction
+
+class ClientPredictor {
+    localState = {}
+    pendingInputs = Queue()
+    lastServerState = {}
+    lastServerTick = 0
+    
+    function OnPlayerInput(input) {
+        // Apply input immediately (optimistic)
+        localState = ApplyInput(localState, input)
+        
+        // Store for server reconciliation
+        pendingInputs.push({
+            input: input,
+            tick: currentTick,
+            resultingState: Clone(localState)
+        })
+        
+        // Send to server
+        SendToServer(input, currentTick)
+        
+        // Render immediately - player sees instant feedback
+        Render(localState)
+    }
+    
+    function OnServerSnapshot(serverState, serverTick) {
+        lastServerState = serverState
+        lastServerTick = serverTick
+        
+        // Remove inputs server has processed
+        pendingInputs = pendingInputs.filter(i => i.tick > serverTick)
+        
+        // Rollback: rewind to server state
+        localState = Clone(serverState)
+        
+        // Replay: re-apply pending inputs
+        foreach (pending in pendingInputs) {
+            localState = ApplyInput(localState, pending.input)
+        }
+        
+        // Check divergence
+        if (Distance(localState, pendingInputs.last().resultingState) > THRESHOLD) {
+            // Misprediction! Smooth correction over multiple frames
+            SmoothCorrection(localState, pendingInputs.last().resultingState)
+        }
+        
+        Render(localState)
+    }
+}
+
+// Key Insight: Client predicts future, server validates past.
+// Correction = (Predicted Reality) - (Validated Reality)

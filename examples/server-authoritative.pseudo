@@ -1,0 +1,54 @@
+// SERVER-AUTHORITATIVE SIMULATION PSEUDOCODE
+// Demonstrates lag compensation and input validation
+
+class ServerAuthority {
+    gameState = {}
+    clientBuffers = Map<ClientID, InputBuffer>()
+    
+    function OnClientInput(clientID, input, clientTick) {
+        // Validate input is physically possible
+        if (!IsValid(input, gameState, clientID)) {
+            Log("Invalid input from client " + clientID)
+            return // Reject
+        }
+        
+        // Add to client's input buffer with timestamp
+        clientBuffers[clientID].push({
+            input: input,
+            clientTick: clientTick,
+            serverReceiveTime: Now()
+        })
+    }
+    
+    function ServerTick() {
+        // Process inputs from all clients
+        foreach (clientID in clientBuffers.keys()) {
+            buffer = clientBuffers[clientID]
+            
+            // LAG COMPENSATION: Rewind game state to client's perspective
+            clientLatency = EstimateLatency(clientID)
+            historicalState = RewindState(gameState, clientLatency)
+            
+            // Apply inputs in timestamp order
+            foreach (bufferedInput in buffer.GetPending()) {
+                historicalState = ApplyInput(historicalState, bufferedInput.input)
+                
+                // Validate results (anti-cheat)
+                if (!ValidateStateTransition(gameState, historicalState)) {
+                    FlagSuspiciousActivity(clientID)
+                }
+            }
+            
+            // Fast-forward to current time
+            gameState = FastForwardState(historicalState, clientLatency)
+            buffer.ClearProcessed()
+        }
+        
+        // Broadcast snapshot to all clients
+        snapshot = CreateSnapshot(gameState, currentTick)
+        BroadcastToClients(snapshot)
+    }
+}
+
+// Key Insight: Server = judge of past events, not predictor of future.
+// Lag compensation ensures fairness by rewinding to "what client saw".
