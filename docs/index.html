@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nine Realities Netcode Model | Technical Documentation</title>
     <meta name="description" content="Formal N+1 concurrent simulation model for competitive multiplayer netcode. Research-backed analysis of client-server reconciliation.">
+        <meta name="keywords" content="netcode, network simulation, multiplayer games, N+1 model, concurrent realities, game development, Unity netcode, Unreal netcode, deterministic simulation, authoritative server">
+        <meta property="og:title" content="Nine Realities Netcode Model | Technical Documentation">
+        <meta property="og:description" content="Formal N+1 concurrent simulation model for competitive multiplayer netcode. Research-validated technical framework.">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://powder-ranger.github.io/nine-realities-netcode/">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Nine Realities Netcode Model">
+        <meta name="twitter:description" content="Formal N+1 concurrent simulation model for competitive multiplayer netcode.">
     
     <style>
         :root {
@@ -417,6 +425,60 @@
                         <li><strong>Repeat:</strong> Process continues at tick rate (60-120 Hz)</li>
                     </ol>
                 </div>
+
+                            <!-- N+1 Visual Diagram -->
+                            <div class="section-card">
+                                                <h3>🕹️ N+1 Visual Representation</h3>
+                                                <p>In a typical 8-player game, the N+1 model consists of <strong>9 concurrent simulations</strong>:</p>
+
+                                                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin:24px 0; max-width:600px;">
+                                                                        <!-- Row 1: Client Simulations 1-3 -->
+                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
+                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 1</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
+                                                                                                </div>
+                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
+                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 2</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
+                                                                                                </div>
+                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
+                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 3</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
+                                                                                                </div>
+
+                                                                        <!-- Row 2: Client Simulations 4-6 -->
+                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
+                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 4</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
+                                                                                                </div>
+                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
+                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 5</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
+                                                                                                </div>
+                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
+                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 6</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
+                                                                                                </div>
+
+                                                                        <!-- Row 3: Client Simulations 7-8 + Server -->
+                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
+                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 7</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
+                                                                                                </div>
+                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
+                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 8</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
+                                                                                                </div>
+                                                                        <div style="background:linear-gradient(135deg, #4a2a0a, #6d3d1a); border:3px solid #FF9800; border-radius:8px; padding:16px; text-align:center; box-shadow:0 0 16px rgba(255,152,0,0.4);">
+                                                                                                    <strong style="color:#FF9800; font-size:1.2em;">🛡️ Server (+1)</strong>
+                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#ffcc80; font-weight:bold;">Authoritative Reality</p>
+                                                                                                </div>
+                                                                    </div>
+
+                                                <div class="highlight-box" style="margin-top:16px;">
+                                                                        <p><strong>🔑 Key Insight:</strong> Each client runs an independent simulation optimized for <strong>local responsiveness</strong>, while the server maintains the <strong>single source of truth</strong>. The model's complexity arises from synchronizing these N+1 divergent realities into a consistent multiplayer experience.</p>
+                                                                    </div>
+                                            </div>
                 
                 <h3>Technical Specifications</h3>
                 <div style="overflow-x:auto;">
@@ -532,6 +594,32 @@
                 <p>Games that trust client-reported hits (even with server validation) are vulnerable to subtle timing exploits where malicious clients send "just plausible enough" hit reports that pass validation checks.</p>
                 <p><strong>Security Implication:</strong> Pure server-authoritative hit detection is the only truly secure model, but introduces perceived latency that competitive players reject.</p>
             </div>
+
+                        <!-- Common Misconceptions Section -->
+                        <div class="section-card">
+                                            <h2>🚫 Common Misconceptions</h2>
+                                            <p>The Nine Realities Model is often misunderstood. Here are critical clarifications:</p>
+
+                                            <div class="highlight-box" style="margin-top:12px;">
+                                                                    <strong>❌ Misconception 1: "The model creates 9 separate game instances"</strong>
+                                                                    <p><strong>✅ Reality:</strong> There is exactly <strong>one authoritative server simulation</strong>. The model describes N+1 concurrent realities as a conceptual framework—each client maintains its own predictive simulation, plus the server maintains the authoritative one. These are not "instances" but independent simulations running the same game logic with different input timing.</p>
+                                                                </div>
+
+                                            <div class="highlight-box" style="margin-top:12px;">
+                                                                    <strong>❌ Misconception 2: "This is just lag compensation"</strong>
+                                                                    <p><strong>✅ Reality:</strong> The N+1 model is a <strong>formal mathematical framework</strong> that encompasses lag compensation, client prediction, server reconciliation, and hit detection. Lag compensation is one mechanism within this broader concurrent simulation model.</p>
+                                                                </div>
+
+                                            <div class="highlight-box" style="margin-top:12px;">
+                                                                    <strong>❌ Misconception 3: "The model is specific to shooter games"</strong>
+                                                                    <p><strong>✅ Reality:</strong> While examples use Rocket League and shooters, the N+1 model applies to <strong>any competitive multiplayer game with client prediction</strong>—racing games, fighting games, sports games, and even some strategy games use variants of this architecture.</p>
+                                                                </div>
+
+                                            <div class="highlight-box" style="margin-top:12px;">
+                                                                    <strong>❌ Misconception 4: "High tick rates solve all netcode problems"</strong>
+                                                                    <p><strong>✅ Reality:</strong> Tick rate is just one variable. The N+1 model shows that <strong>fundamental trade-offs exist</strong> between responsiveness and consistency regardless of tick rate. Even 128Hz servers face the same architectural challenges—just at smaller time scales.</p>
+                                                                </div>
+                                        </div>
         </div>
 
         <!-- Interactive Simulation Tab -->
@@ -843,6 +931,37 @@
                         <li><strong>Server Proximity Metrics:</strong> Track player distance to server. In competitive scenes, proximity correlates with tournament placement stronger than many skill metrics.</li>
                     </ul>
                 </div>
+
+                            <!-- Recommended Resources Section -->
+                            <div class="section-card">
+                                                <h2>📚 Recommended Resources</h2>
+                                                <p>For those looking to deepen their understanding of netcode architecture, here are essential resources:</p>
+
+                                                <h3>🎮 Official Engine Documentation</h3>
+                                                <ul style="margin:0; padding-left:20px;">
+                                                                        <li><strong>Unity Netcode for GameObjects:</strong> <a href="https://docs-multiplayer.unity3d.com/" target="_blank" style="color:#4CAF50;">Official Unity Multiplayer Documentation</a> - Comprehensive guide to Unity's netcode implementation</li>
+                                                                        <li><strong>Unreal Engine Replication:</strong> <a href="https://docs.unrealengine.com/5.0/en-US/networking-and-multiplayer-in-unreal-engine/" target="_blank" style="color:#4CAF50;">Unreal Multiplayer Framework</a> - Deep dive into Unreal's authoritative server model</li>
+                                                                        <li><strong>Source Engine Networking:</strong> <a href="https://developer.valvesoftware.com/wiki/Source_Multiplayer_Networking" target="_blank" style="color:#4CAF50;">Valve Developer Wiki</a> - Classic resource on lag compensation and client prediction</li>
+                                                                    </ul>
+
+                                                <h3>📝 Foundational Articles</h3>
+                                                <ul style="margin:0; padding-left:20px;">
+                                                                        <li><strong>Gaffer on Games:</strong> <a href="https://gafferongames.com/" target="_blank" style="color:#4CAF50;">Networking Series by Glenn Fiedler</a> - Industry-standard explanation of client-server architecture ("What Every Programmer Needs to Know About Game Networking")</li>
+                                                                        <li><strong>1500 Archers on a 28.8:</strong> <a href="https://www.gamedeveloper.com/programming/1500-archers-on-a-28-8-network-programming-in-age-of-empires-and-beyond" target="_blank" style="color:#4CAF50;">Age of Empires Postmortem</a> - Classic case study on RTS netcode optimization</li>
+                                                                        <li><strong>Rocket League Netcode Analysis:</strong> <a href="https://www.youtube.com/watch?v=ueEmiDM94IE" target="_blank" style="color:#4CAF50;">Rocket Science by Halfway Dead</a> - Detailed breakdown of predictive netcode in competitive play</li>
+                                                                    </ul>
+
+                                                <h3>🔬 Research Papers</h3>
+                                                <ul style="margin:0; padding-left:20px;">
+                                                                        <li><strong>Time Synchronization:</strong> <em>"Precision Time Protocol (PTP) for Distributed Systems"</em> - IEEE 1588 standard</li>
+                                                                        <li><strong>Distributed Consensus:</strong> <em>"The Part-Time Parliament"</em> by Leslie Lamport (Paxos algorithm)</li>
+                                                                        <li><strong>Dead Reckoning:</strong> <em>"Distributed Interactive Simulation (DIS)"</em> - IEEE 1278 standard for predictive modeling</li>
+                                                                    </ul>
+
+                                                <div class="highlight-box" style="margin-top:20px;">
+                                                                        <p><strong>💡 Learning Path:</strong> Start with Gaffer on Games for fundamentals, then explore engine-specific documentation for your platform. The N+1 model provides a unifying framework to connect these resources conceptually.</p>
+                                                                    </div>
+                                            </div>
                 
                 <h3>🔬 For Researchers & Academics</h3>
                 <div style="background:var(--color-bg); padding:20px; border-radius:8px; margin:16px 0;">
@@ -871,6 +990,11 @@
             <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/raw/main/paper/Nine-Realities-Netcode-Model_-Technical-Analysis.docx" style="color:var(--color-accent); text-decoration:none; margin:0 12px;">📄 Download Paper</a>
             <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/discussions" style="color:var(--color-accent); text-decoration:none; margin:0 12px;">💬 Discussions</a>
         </p>
+                    <p style="margin-top:16px; font-size:0.85rem; color:var(--color-text-secondary);">
+                                        <strong style="color:var(--color-accent);">Version 2.0</strong> | Last Updated: November 29, 2025 | 
+                                        <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/commits/main/docs/index.html" style="color:var(--color-accent); text-decoration:none;" target="_blank">📝 Changelog</a> | 
+                                        <span>Licensed under <a href="https://opensource.org/licenses/MIT" style="color:var(--color-accent); text-decoration:none;" target="_blank">MIT License</a></span>
+                                    </p>
         <p style="font-size:0.875rem; color:var(--color-text-secondary);">Built with research, validated with data, powered by curiosity</p>
     </footer>
 
