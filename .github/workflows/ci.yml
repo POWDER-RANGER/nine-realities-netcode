@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check markdown files
+      run: |
+        find . -name "*.md" -type f -exec echo "Checking: {}" \;
+        # Basic markdown validation
+        for file in $(find . -name "*.md"); do
+          if [ ! -s "$file" ]; then
+            echo "Error: Empty markdown file $file"
+            exit 1
+          fi
+        done
+    
+    - name: Validate examples structure
+      run: |
+        if [ -d "examples" ]; then
+          echo "Examples directory exists"
+          ls -la examples/
+        fi
+    
+    - name: Check paper directory
+      run: |
+        if [ -d "paper" ]; then
+          echo "Paper directory exists"
+          ls -la paper/
+        fi
+    
+    - name: Validate documentation structure
+      run: |
+        if [ -d "docs" ]; then
+          echo "Docs directory exists"
+          ls -la docs/
+        fi
+    
+    - name: Check for required files
+      run: |
+        required_files="README.md LICENSE CHANGELOG.md"
+        for file in $required_files; do
+          if [ ! -f "$file" ]; then
+            echo "Warning: Missing $file"
+          else
+            echo "Found: $file"
+          fi
+        done
+
+  build:
+    name: Build Status
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Repository structure check
+      run: |
+        echo "Repository structure:"
+        tree -L 2 -I 'node_modules' || ls -R | head -50
+    
+    - name: Success
+      run: echo "Build validation complete"
