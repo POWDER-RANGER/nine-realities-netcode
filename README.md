@@ -2,6 +2,20 @@
 
 **Multi-client state reconciliation in multiplayer game networking: Server-authoritative architecture with client-side prediction and rollback-based reconciliation**
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-POWDER--RANGER-pink?style=for-the-badge&logo=github)](https://github.com/sponsors/POWDER-RANGER)
+
+## 💖 Support This Research
+
+If Nine Realities Netcode has helped your game development, research, or understanding of multiplayer systems, consider sponsoring its continued development. Your support enables:
+- ✅ More detailed technical analysis and diagrams
+- ✅ Code examples and implementation guides
+- ✅ Performance benchmarks and case studies
+- ✅ Community support and Q&A
+
+[**Become a Sponsor →**](https://github.com/sponsors/POWDER-RANGER)
+
+---
+
 ## Overview
 
 This repository contains comprehensive research and analysis on advanced netcode architectures for multiplayer games, specifically focusing on the N+1 concurrent simulation model that powers modern competitive titles.
@@ -158,5 +172,13 @@ https://github.com/POWDER-RANGER/nine-realities-netcode
 ## License
 
 This project is licensed under the MIT License. See LICENSE..
+
+---
+
+## 💖 Sponsor This Project
+
+If this research has helped your work, please consider [**sponsoring further development**](https://github.com/sponsors/POWDER-RANGER). Every contribution helps fund more detailed analysis, code examples, and community support.
+
+---
 
 **Built with**: Deep technical analysis, competitive gaming insight, and years of hands-on experience
