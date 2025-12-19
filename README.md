@@ -1,5 +1,14 @@
 # Nine Realities Netcode Model
 
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![GitHub stars](https://img.shields.io/github/stars/POWDER-RANGER/nine-realities-netcode.svg?style=social&label=Star)](https://github.com/POWDER-RANGER/nine-realities-netcode)
+[![GitHub forks](https://img.shields.io/github/forks/POWDER-RANGER/nine-realities-netcode.svg?style=social&label=Fork)](https://github.com/POWDER-RANGER/nine-realities-netcode/fork)
+[![GitHub issues](https://img.shields.io/github/issues/POWDER-RANGER/nine-realities-netcode)](https://github.com/POWDER-RANGER/nine-realities-netcode/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/POWDER-RANGER/nine-realities-netcode)](https://github.com/POWDER-RANGER/nine-realities-netcode/commits/main)
+[![Pages deployment](https://github.com/POWDER-RANGER/nine-realities-netcode/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/POWDER-RANGER/nine-realities-netcode/actions/workflows/pages/pages-build-deployment)
+[![Language](https://img.shields.io/github/languages/top/POWDER-RANGER/nine-realities-netcode)](https://github.com/POWDER-RANGER/nine-realities-netcode)
+[![Code size](https://img.shields.io/github/languages/code-size/POWDER-RANGER/nine-realities-netcode)](https://github.com/POWDER-RANGER/nine-realities-netcode)
+
 **Multi-client state reconciliation in multiplayer game networking: Server-authoritative architecture with client-side prediction and rollback-based reconciliation**
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-POWDER--RANGER-pink?style=for-the-badge&logo=github)](https://github.com/sponsors/POWDER-RANGER)
@@ -176,6 +185,33 @@ This project is licensed under the MIT License. See LICENSE..
 ---
 
 ## 💖 Sponsor This Project
+
+---
+
+## 🏗️ Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+- Code style and standards
+- Testing requirements
+- Pull request process
+- Community guidelines
+
+## 🔒 Security
+
+See [SECURITY.md](SECURITY.md) for our security policy and how to report vulnerabilities.
+
+## 📊 Performance Benchmarks
+
+Coming soon: Real-world latency measurements, rollback costs, and performance comparisons across different network conditions.
+
+## 📚 Case Studies
+
+In-depth analysis of netcode implementations:
+- **Rocket League**: Advanced ball prediction and physics reconciliation
+- **Valorant**: 128-tick servers and peeker's advantage mitigation
+- **Overwatch 2**: Favor-the-shooter vs hit registration accuracy
+
+*(Detailed case studies in progress)*
 
 If this research has helped your work, please consider [**sponsoring further development**](https://github.com/sponsors/POWDER-RANGER). Every contribution helps fund more detailed analysis, code examples, and community support.
 
