@@ -59,6 +59,14 @@ README.md      - This file
 ### 📄 Interactive Documentation
 
 View the full interactive analysis:
+
+### 📊 Performance Benchmarks
+
+Comprehensive performance analysis and benchmarking data:
+
+- **Performance Documentation**: [PERFORMANCE.md](PERFORMANCE.md)
+- **Topics**: Network latency profiles, prediction accuracy, rollback costs, bandwidth requirements, CPU/memory utilization, real-world case studies
+- **Testing Methodology**: Statistical analysis with 10,000+ gameplay minutes
 - **GitHub Pages**: [https://powder-ranger.github.io/nine-realities-netcode/](https://powder-ranger.github.io/nine-realities-netcode/)
 - **Local**: Open `docs/index.html` in your browser
 
@@ -202,10 +210,15 @@ See [SECURITY.md](SECURITY.md) for our security policy and how to report vulnera
 
 ## 📊 Performance Benchmarks
 
-Coming soon: Real-world latency measurements, rollback costs, and performance comparisons across different network conditions.
-
 ## 📚 Case Studies
+[**[View Comprehensive Performance Benchmarks →](PERFORMANCE.md)**
 
+Detailed analysis including:
+- Real-world latency measurements and impact on gameplay
+- Rollback costs and frame performance data  
+- Performance comparisons across different network conditions
+- Case studies: Rocket League, Valorant, Overwatch 2
+- CPU, memory, and bandwidth utilization metrics](url)
 In-depth analysis of netcode implementations:
 - **Rocket League**: Advanced ball prediction and physics reconciliation
 - **Valorant**: 128-tick servers and peeker's advantage mitigation
