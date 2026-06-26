@@ -3,1596 +3,1055 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nine Realities Netcode Model | Technical Documentation</title>
-    <meta name="description" content="Formal N+1 concurrent simulation model for competitive multiplayer netcode. Research-backed analysis of client-server reconciliation.">
-        <meta name="keywords" content="netcode, network simulation, multiplayer games, N+1 model, concurrent realities, game development, Unity netcode, Unreal netcode, deterministic simulation, authoritative server">
-        <meta property="og:title" content="Nine Realities Netcode Model | Technical Documentation">
-        <meta property="og:description" content="Formal N+1 concurrent simulation model for competitive multiplayer netcode. Research-validated technical framework.">
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="https://powder-ranger.github.io/nine-realities-netcode/">
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="Nine Realities Netcode Model">
-        <meta name="twitter:description" content="Formal N+1 concurrent simulation model for competitive multiplayer netcode.">
-    
+    <title>Nine Realities Netcode v3.0 | UE5.5+ / UE6 Plugin</title>
+    <meta name="description" content="Production-ready N+1 concurrent simulation framework for competitive multiplayer netcode. Unreal Engine 5.5+ plugin with UE6 forward compatibility.">
+    <meta name="keywords" content="netcode, multiplayer games, N+1 model, Unreal Engine, UE5, UE6, game networking, client-side prediction, server authoritative, rollback, state reconciliation">
+    <meta property="og:title" content="Nine Realities Netcode v3.0 | UE5.5+ / UE6 Plugin">
+    <meta property="og:description" content="Production-ready N+1 concurrent simulation framework. Unreal Engine 5.5+ plugin with UE6 forward compatibility.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://powder-ranger.github.io/nine-realities-netcode/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nine Realities Netcode v3.0">
+    <meta name="twitter:description" content="Production-ready N+1 concurrent simulation framework for UE5.5+ with UE6 forward compatibility.">
     <style>
         :root {
-            --color-bg: #0d1117;
-            --color-surface: #161b22;
-            --color-card-border: #30363d;
-            --color-border: #21262d;
-            --color-text-primary: #c9d1d9;
-            --color-text-secondary: #8b949e;
-            --color-accent: #58a6ff;
-            --color-accent-hover: #79c0ff;
-            --color-success: #3fb950;
-            --color-warning: #d29922;
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2236;
+            --border-color: #2a3449;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
             --radius-sm: 6px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --space-8: 8px;
-            --space-12: 12px;
-            --space-16: 16px;
-            --space-24: 24px;
-            --space-32: 32px;
-            --font-size-sm: 0.875rem;
-            --font-size-base: 1rem;
-            --font-size-lg: 1.125rem;
-            --font-size-xl: 1.5rem;
-            --font-size-2xl: 2rem;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 40px rgba(0,0,0,0.4);
+            --glow-blue: 0 0 20px rgba(59,130,246,0.15);
+            --glow-purple: 0 0 20px rgba(139,92,246,0.15);
         }
-        
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        html { scroll-behavior: smooth; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-            background: var(--color-bg);
-            color: var(--color-text-primary);
-            line-height: 1.6;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
         }
-        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+        /* ===== HERO ===== */
         .hero {
-            background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
-            border-bottom: 1px solid var(--color-card-border);
-            padding: var(--space-32) var(--space-24);
+            position: relative;
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
+            padding: 40px 24px;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.15), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(139,92,246,0.08), transparent),
+                linear-gradient(180deg, #0f172a 0%, var(--bg-primary) 100%);
+            overflow: hidden;
         }
-        
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="g" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(59,130,246,0.06)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23g)"/></svg>');
+            background-size: 40px 40px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--accent-primary);
+            font-weight: 500;
+            margin-bottom: 24px;
+            z-index: 1;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        .hero-badge .pulse {
+            width: 8px; height: 8px;
+            background: var(--accent-success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
         .hero h1 {
-            font-size: var(--font-size-2xl);
-            font-weight: 600;
-            margin-bottom: var(--space-12);
-            background: linear-gradient(90deg, var(--color-accent) 0%, #bc8cff 100%);
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.15;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.1s both;
+        }
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
-        .hero p {
-            font-size: var(--font-size-lg);
-            color: var(--color-text-secondary);
-            max-width: 700px;
-            margin: 0 auto var(--space-24);
+        .hero .subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--text-secondary);
+            max-width: 640px;
+            margin-bottom: 32px;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
         }
-        
-        .download-buttons {
+        .hero-buttons {
             display: flex;
-            gap: var(--space-12);
-            justify-content: center;
+            gap: 12px;
             flex-wrap: wrap;
+            justify-content: center;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
         }
-        
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: var(--space-8);
-            padding: 10px 20px;
+            gap: 8px;
+            padding: 12px 24px;
             border-radius: var(--radius-md);
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 0.95rem;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             border: 1px solid transparent;
+            cursor: pointer;
         }
-        
         .btn-primary {
-            background: var(--color-accent);
-            color: #fff;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            box-shadow: var(--glow-blue);
         }
-        
         .btn-primary:hover {
-            background: var(--color-accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59,130,246,0.3);
+        }
+        .btn-outline {
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.03);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent-primary);
+            background: rgba(59,130,246,0.08);
             transform: translateY(-2px);
         }
-        
-        .btn-outline {
-            border-color: var(--color-card-border);
-            color: var(--color-text-primary);
+        .btn-gold {
+            border-color: rgba(245,158,11,0.4);
+            color: var(--accent-warning);
+            background: rgba(245,158,11,0.08);
         }
-        
-        .btn-outline:hover {
-            background: var(--color-surface);
-            border-color: var(--color-accent);
+        .btn-gold:hover {
+            background: rgba(245,158,11,0.15);
+            transform: translateY(-2px);
         }
-        
+
+        /* ===== NAV ===== */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10,14,23,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-inner::-webkit-scrollbar { display: none; }
+        .nav-tab {
+            padding: 16px 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+        .nav-tab:hover { color: var(--text-primary); }
+        .nav-tab.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+        .nav-tab .new-badge {
+            position: absolute;
+            top: 8px;
+            right: 4px;
+            font-size: 0.55rem;
+            padding: 1px 5px;
+            background: var(--accent-success);
+            color: white;
+            border-radius: 100px;
+            font-weight: 700;
+        }
+
+        /* ===== CONTAINER ===== */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: var(--space-24);
+            padding: 40px 24px;
         }
-        
-        .tabs {
-            display: flex;
-            gap: var(--space-8);
-            border-bottom: 1px solid var(--color-border);
-            margin-bottom: var(--space-24);
-            flex-wrap: wrap;
-        }
-        
-        .tab {
-            padding: 12px 20px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            color: var(--color-text-secondary);
-            font-size: var(--font-size-base);
-            border-bottom: 2px solid transparent;
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 24px;
             transition: all 0.2s;
         }
-        
-        .tab:hover {
-            color: var(--color-text-primary);
+        .card:hover { border-color: rgba(59,130,246,0.3); box-shadow: var(--shadow); }
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .tab.active {
-            color: var(--color-accent);
-            border-bottom-color: var(--color-accent);
+        .card h3 {
+            font-size: 1.15rem;
+            margin: 24px 0 12px;
+            color: var(--text-primary);
         }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .section-card {
-            background: var(--color-surface);
-            border: 1px solid var(--color-card-border);
-            border-radius: var(--radius-lg);
-            padding: var(--space-24);
-            margin-bottom: var(--space-24);
-        }
-        
-        .section-card h2 {
-            font-size: var(--font-size-xl);
-            margin-bottom: var(--space-16);
-            color: var(--color-accent);
-        }
-        
-        .section-card h3 {
-            font-size: var(--font-size-lg);
-            margin: var(--space-24) 0 var(--space-12);
-            color: var(--color-text-primary);
-        }
-        
-        .section-card p, .section-card li {
-            color: var(--color-text-secondary);
-            line-height: 1.8;
-        }
-        
-        .section-card ul {
-            margin: var(--space-16) 0;
-            padding-left: var(--space-24);
-        }
-        
-        .section-card li {
-            margin-bottom: var(--space-8);
-        }
-        
+        .card p, .card li { color: var(--text-secondary); line-height: 1.8; }
+        .card ul { margin: 12px 0; padding-left: 24px; }
+        .card li { margin-bottom: 8px; }
+
+        /* ===== STATS ===== */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--space-16);
-            margin: var(--space-24) 0;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
         }
-        
         .stat-card {
-            background: var(--color-bg);
-            border: 1px solid var(--color-border);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            padding: var(--space-16);
+            padding: 24px;
             text-align: center;
+            transition: all 0.2s;
         }
-        
+        .stat-card:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
         .stat-value {
-            font-size: var(--font-size-2xl);
+            font-size: 2rem;
             font-weight: 700;
-            color: var(--color-accent);
-            display: block;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        
         .stat-label {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-            margin-top: var(--space-8);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
-        
-        .interactive-sim {
-            background: var(--color-surface);
-            border: 1px solid var(--color-card-border);
-            border-radius: var(--radius-lg);
-            padding: var(--space-24);
-            margin: var(--space-24) 0;
-        }
-        
-        .interactive-sim h3 {
-            margin-bottom: var(--space-16);
-            color: var(--color-accent);
-        }
-        
-        #netcodeCanvas {
-            width: 100%;
-            max-width: 800px;
-            height: 400px;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            background: var(--color-bg);
-            display: block;
-            margin: 0 auto;
-        }
-        
-        .sim-controls {
-            display: flex;
-            gap: var(--space-12);
-            margin-top: var(--space-16);
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .slider-control {
-            margin-top: var(--space-16);
-        }
-        
-        .slider-control label {
-            display: block;
-            margin-bottom: var(--space-8);
-            color: var(--color-text-secondary);
-        }
-        
-        .slider-control input[type="range"] {
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        code {
-            background: var(--color-bg);
-            padding: 2px 6px;
+
+        /* ===== HIGHLIGHT BOX ===== */
+        .highlight {
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08));
+            border-left: 3px solid var(--accent-primary);
             border-radius: var(--radius-sm);
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            color: var(--color-accent);
+            padding: 20px;
+            margin: 16px 0;
         }
-        
-        pre {
-            background: var(--color-bg);
-            border: 1px solid var(--color-border);
+        .highlight p { margin: 0; color: var(--text-secondary); }
+        .highlight strong { color: var(--text-primary); }
+
+        /* ===== UE6 BADGE ===== */
+        .ue6-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.1));
+            border: 1px solid rgba(245,158,11,0.3);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: var(--accent-warning);
+            font-weight: 600;
+        }
+
+        /* ===== FEATURE GRID ===== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 24px 0;
+        }
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            padding: var(--space-16);
-            overflow-x: auto;
-            margin: var(--space-16) 0;
+            padding: 24px;
+            transition: all 0.2s;
         }
-        
+        .feature-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--glow-blue);
+            transform: translateY(-2px);
+        }
+        .feature-card .icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        .feature-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        .feature-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+        /* ===== CODE ===== */
+        code {
+            background: rgba(59,130,246,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.85em;
+            color: var(--accent-primary);
+        }
+        pre {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            overflow-x: auto;
+            margin: 16px 0;
+            position: relative;
+        }
         pre code {
             background: none;
             padding: 0;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #e6edf3;
         }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: var(--radius-sm);
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            margin-right: var(--space-8);
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
-        
-        .badge-success {
-            background: var(--color-success);
-            color: #fff;
+        .code-header + pre { border-radius: 0 0 var(--radius-md) var(--radius-md); margin-top: 0; }
+
+        /* ===== TABLE ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
         }
-        
-        .badge-warning {
-            background: var(--color-warning);
-            color: #000;
+        th {
+            text-align: left;
+            padding: 12px;
+            color: var(--accent-primary);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
         }
-        
-        .highlight-box {
-            background: var(--color-bg);
-            border-left: 4px solid var(--color-accent);
-            padding: var(--space-16);
-            margin: var(--space-16) 0;
-            border-radius: var(--radius-sm);
+        td {
+            padding: 12px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(42,52,73,0.5);
+        }
+        tr:hover td { background: rgba(59,130,246,0.03); }
+
+        /* ===== SIMULATION ===== */
+        .sim-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin: 24px 0;
+        }
+        .sim-container h3 { color: var(--accent-primary); margin-bottom: 16px; }
+        canvas {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            display: block;
+            margin: 0 auto;
+        }
+        .sim-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .slider-control {
+            margin-top: 16px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .slider-control label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .slider-control input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-primary);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 48px 24px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+        }
+        footer a { color: var(--accent-primary); text-decoration: none; margin: 0 10px; }
+        footer a:hover { text-decoration: underline; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero { min-height: 70vh; padding: 24px 16px; }
+            .hero h1 { font-size: 1.8rem; }
+            .card { padding: 20px; }
+            .container { padding: 20px 16px; }
+            .nav-tab { padding: 12px 14px; font-size: 0.85rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Hero Section -->
-    <div class="hero">
-        <h1>Nine Realities Netcode Model</h1>
-        <p>Formal N+1 concurrent simulation framework for competitive multiplayer netcode. Research-backed analysis of client-server state reconciliation.</p>
-        
-        <div class="download-buttons">
-            <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/raw/main/paper/Nine-Realities-Netcode-Model_-Technical-Analysis.docx" class="btn btn-primary" target="_blank">📄 Download Full Paper</a>
-            <a href="https://github.com/POWDER-RANGER/nine-realities-netcode" class="btn btn-outline" target="_blank">🔗 View on GitHub</a>
-            <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/blob/main/README.md" class="btn btn-outline" target="_blank">📝 README</a>
-        </div>
+<!-- ===== HERO ===== -->
+<div class="hero">
+    <div class="hero-badge">
+        <span class="pulse"></span>
+        v3.0 Now Available — Unreal Engine Plugin
     </div>
+    <h1>Nine Realities Netcode<br><span class="gradient">N+1 Concurrent Simulation</span></h1>
+    <p class="subtitle">
+        Production-ready multiplayer networking framework for Unreal Engine 5.5+ with forward
+        compatibility for UE6. Server-authoritative architecture with client-side prediction,
+        rollback-based reconciliation, and adaptive state synchronization.
+    </p>
+    <div class="hero-buttons">
+        <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/tree/unreal-9-reality-netcode-n1/NineRealitiesNetcode" class="btn btn-primary" target="_blank">
+            <span>↓</span> Download UE Plugin
+        </a>
+        <a href="https://github.com/POWDER-RANGER/nine-realities-netcode" class="btn btn-outline" target="_blank">
+            <span>★</span> View on GitHub
+        </a>
+        <a href="#ue6" class="btn btn-gold">
+            <span>▲</span> UE6 Roadmap
+        </a>
+    </div>
+</div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Tabs Navigation -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab(event, 'overview')">Overview</button>
-            <button class="tab" onclick="switchTab(event, 'model')">The Model</button>
-            <button class="tab" onclick="switchTab(event, 'findings')">Key Findings</button>
-            <button class="tab" onclick="switchTab(event, 'simulation')">Interactive Sim</button>
-            <button class="tab" onclick="switchTab(event, 'validation')">Research Validation</button>
-            <button class="tab" onclick="switchTab(event, 'applications')">Applications</button>
+<!-- ===== NAVIGATION ===== -->
+<nav class="nav">
+    <div class="nav-inner">
+        <button class="nav-tab active" onclick="switchTab(event,'overview')">Overview</button>
+        <button class="nav-tab" onclick="switchTab(event,'model')">The Model</button>
+        <button class="nav-tab" onclick="switchTab(event,'plugin')">UE Plugin<span class="new-badge">NEW</span></button>
+        <button class="nav-tab" onclick="switchTab(event,'findings')">Key Findings</button>
+        <button class="nav-tab" onclick="switchTab(event,'simulation')">Interactive Sim</button>
+        <button class="nav-tab" onclick="switchTab(event,'ue6')">UE6 Ready<span class="new-badge">UE6</span></button>
+        <button class="nav-tab" onclick="switchTab(event,'validation')">Validation</button>
+        <button class="nav-tab" onclick="switchTab(event,'applications')">Applications</button>
+    </div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="container">
+
+<!-- ===== OVERVIEW TAB ===== -->
+<div id="overview" class="tab-content active">
+    <div class="card">
+        <h2>What Is This?</h2>
+        <p>The Nine Realities Netcode Model describes the fundamental challenge of multiplayer game synchronization: in any networked game with N players and 1 authoritative server, there exist <strong>N+1 concurrent but divergent simulations</strong> of the same game state.</p>
+        <div class="highlight">
+            <p><strong>Core Insight:</strong> Every client predicts the future to maintain responsive gameplay, while the server reconstructs the past to validate fairness. The "truth" emerges through continuous reconciliation between these competing realities.</p>
         </div>
 
-        <!-- Overview Tab -->
-        <div id="overview" class="tab-content active">
-            <div class="section-card">
-                <h2>What Is This?</h2>
-                <p>The Nine Realities Netcode Model describes the fundamental challenge of multiplayer game synchronization: in any networked game with N players and 1 authoritative server, there exist N+1 concurrent but divergent simulations of the same game state.</p>
-                
-                <div class="highlight-box">
-                    <strong>Core Insight:</strong> Every client predicts the future to maintain responsive gameplay, while the server reconstructs the past to validate fairness. The “truth” emerges through continuous reconciliation between these competing realities.
-                </div>
-                
-                <h3>Why This Matters</h3>
-                <ul>
-                    <li><strong>For Game Developers:</strong> Understand the architectural tradeoffs between responsiveness, fairness, and bandwidth in competitive netcode design.</li>
-                    <li><strong>For Players:</strong> Demystify common multiplayer frustrations like “lag compensation”, “hit rejection”, and “rubber-banding”.</li>
-                    <li><strong>For Analysts:</strong> Framework for evaluating netcode quality in competitive titles and understanding behavioral manipulation through prediction systems.</li>
-                </ul>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-value">4000+</span>
-                        <span class="stat-label">Hours Analyzed</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value">98</span>
-                        <span class="stat-label">Sources Cited</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value">95.2%</span>
-                        <span class="stat-label">Verification Rate</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value">N+1</span>
-                        <span class="stat-label">Concurrent Realities</span>
-                    </div>
-                </div>
+        <h3>🎮 Unreal Engine Plugin (v3.0)</h3>
+        <p>The new <strong>NineRealitiesNetcode</strong> UE plugin brings the N+1 model from theory to production. It provides a complete implementation of:</p>
+        <ul>
+            <li><strong>UN1NetcodeManager</strong> — Central orchestrator with configurable modes (Standalone/Client/Server/ListenServer)</li>
+            <li><strong>UN1ClientPrediction</strong> — Adaptive prediction (Conservative/Balanced/Aggressive/Adaptive modes)</li>
+            <li><strong>UN1ServerAuthority</strong> — Authoritative simulation with per-client adaptive snapshots and lag compensation</li>
+            <li><strong>UN1RollbackEngine</strong> — Rollback + replay with cost estimation and depth limiting</li>
+            <li><strong>UN1BlendInterpolator</strong> — Smooth correction blending with multiple curve types</li>
+            <li><strong>UN1NetworkClock</strong> — High-precision synchronization with jitter estimation</li>
+        </ul>
+        <div class="highlight">
+            <p><span class="ue6-badge">UE6 Forward Compatible</span> The plugin includes a compatibility layer that detects the runtime engine version and adapts behavior for UE5.5+ and future UE6 releases.</p>
+        </div>
+
+        <h3>Why This Matters</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">🎮</div>
+                <h4>For Game Developers</h4>
+                <p>Drop-in UE plugin for production-grade competitive netcode. Configurable strategies, full source, MIT licensed.</p>
             </div>
-        </div>
-
-        <!-- The Model Tab -->
-        <div id="model" class="tab-content">
-            <div class="section-card">
-                <h2>The N+1 Reality Framework</h2>
-                <p>In a multiplayer game with N players and 1 server, there are N+1 independent simulations running concurrently. Each simulation has its own view of "reality" based on its information horizon.</p>
-                
-                <h3>Client Realities (N)</h3>
-                <p>Each player's machine runs a local prediction simulation:</p>
-                <ul>
-                    <li><strong>Optimistic Prediction:</strong> Assumes inputs succeed immediately to maintain responsive feel (sub-16ms frame times)</li>
-                    <li><strong>Local Authority:</strong> Player sees their own actions take effect instantly, even before server validation</li>
-                    <li><strong>Interpolation Buffer:</strong> Other players are rendered 1-3 frames behind to smooth over packet loss</li>
-                    <li><strong>Correction Reconciliation:</strong> When server state conflicts with prediction, client must "rollback" and replay inputs</li>
-                    <li><strong>Extrapolation:</strong> When no new data arrives, client must guess future positions based on last known velocity</li>
-                    <li><strong>Dead Reckoning:</strong> Predictive algorithms estimate entity positions between snapshots</li>
-                </ul>
-                
-                <h3>Server Reality (+1)</h3>
-                <p>The authoritative simulation that enforces fairness:</p>
-                <ul>
-                    <li><strong>Input Buffering:</strong> Collects timestamped inputs from all clients before processing</li>
-                    <li><strong>Lag Compensation:</strong> Rewinds game state to match each client's perception during hit validation</li>
-                    <li><strong>State Broadcasting:</strong> Sends periodic snapshots to all clients (typically 20-60 Hz)</li>
-                    <li><strong>Desync Detection:</strong> Flags impossible states that indicate cheating or bugs</li>
-                    <li><strong>Input Validation:</strong> Rejects physically impossible moves or actions</li>
-                    <li><strong>Priority Queuing:</strong> Handles time-critical inputs (shots, collisions) with lower latency tolerance</li>
-                </ul>
-                
-                <h3>The Reconciliation Loop</h3>
-                <div class="highlight-box">
-                    <ol style="margin:0; padding-left:20px;">
-                        <li><strong>Client:</strong> Predicts movement, renders immediately (t=0ms)</li>
-                        <li><strong>Network:</strong> Input packet travels to server (t=25-80ms typical RTT/2)</li>
-                        <li><strong>Server:</strong> Validates input against authoritative state, broadcasts snapshot</li>
-                        <li><strong>Network:</strong> Snapshot returns to client (another RTT/2)</li>
-                        <li><strong>Client:</strong> Receives snapshot, compares with prediction, applies corrections if needed</li>
-                        <li><strong>Visual Smoothing:</strong> Blend mispredictions over 3-5 frames to hide "rubber-banding"</li>
-                        <li><strong>Repeat:</strong> Process continues at tick rate (60-120 Hz)</li>
-                    </ol>
-                </div>
-
-                            <!-- N+1 Visual Diagram -->
-                            <div class="section-card">
-                                                <h3>🕹️ N+1 Visual Representation</h3>
-                                                <p>In a typical 8-player game, the N+1 model consists of <strong>9 concurrent simulations</strong>:</p>
-
-                                                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin:24px 0; max-width:600px;">
-                                                                        <!-- Row 1: Client Simulations 1-3 -->
-                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
-                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 1</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
-                                                                                                </div>
-                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
-                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 2</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
-                                                                                                </div>
-                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
-                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 3</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
-                                                                                                </div>
-
-                                                                        <!-- Row 2: Client Simulations 4-6 -->
-                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
-                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 4</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
-                                                                                                </div>
-                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
-                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 5</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
-                                                                                                </div>
-                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
-                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 6</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
-                                                                                                </div>
-
-                                                                        <!-- Row 3: Client Simulations 7-8 + Server -->
-                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
-                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 7</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
-                                                                                                </div>
-                                                                        <div style="background:linear-gradient(135deg, #1a472a, #2d5a3d); border:2px solid #4CAF50; border-radius:8px; padding:16px; text-align:center;">
-                                                                                                    <strong style="color:#4CAF50; font-size:1.1em;">💻 Client 8</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#b0b0b0;">Local Prediction</p>
-                                                                                                </div>
-                                                                        <div style="background:linear-gradient(135deg, #4a2a0a, #6d3d1a); border:3px solid #FF9800; border-radius:8px; padding:16px; text-align:center; box-shadow:0 0 16px rgba(255,152,0,0.4);">
-                                                                                                    <strong style="color:#FF9800; font-size:1.2em;">🛡️ Server (+1)</strong>
-                                                                                                    <p style="font-size:0.85em; margin:8px 0 0 0; color:#ffcc80; font-weight:bold;">Authoritative Reality</p>
-                                                                                                </div>
-                                                                    </div>
-
-                                                <div class="highlight-box" style="margin-top:16px;">
-                                                                        <p><strong>🔑 Key Insight:</strong> Each client runs an independent simulation optimized for <strong>local responsiveness</strong>, while the server maintains the <strong>single source of truth</strong>. The model's complexity arises from synchronizing these N+1 divergent realities into a consistent multiplayer experience.</p>
-                                                                    </div>
-                                            </div>
-                
-                <h3>Technical Specifications</h3>
-                <div style="overflow-x:auto;">
-                    <table style="width:100%; border-collapse: collapse; margin:16px 0;">
-                        <tr style="background:var(--color-bg); border-bottom:1px solid var(--color-border);">
-                            <th style="padding:12px; text-align:left; color:var(--color-accent);">Parameter</th>
-                            <th style="padding:12px; text-align:left; color:var(--color-accent);">Typical Range</th>
-                            <th style="padding:12px; text-align:left; color:var(--color-accent);">Rocket League</th>
-                            <th style="padding:12px; text-align:left; color:var(--color-accent);">Impact</th>
-                        </tr>
-                        <tr style="border-bottom:1px solid var(--color-border);">
-                            <td style="padding:12px; color:var(--color-text-secondary);">Client Tick Rate</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">60-144 Hz</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">120 Hz</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">Higher = smoother prediction</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid var(--color-border);">
-                            <td style="padding:12px; color:var(--color-text-secondary);">Server Tick Rate</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">20-128 Hz</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">120 Hz</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">Higher = more accurate sim</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid var(--color-border);">
-                            <td style="padding:12px; color:var(--color-text-secondary);">Snapshot Rate</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">20-60 Hz</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">60 Hz</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">Higher = less extrapolation</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid var(--color-border);">
-                            <td style="padding:12px; color:var(--color-text-secondary);">Input Buffer</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">50-200ms</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">~100ms</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">Lag comp window</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid var(--color-border);">
-                            <td style="padding:12px; color:var(--color-text-secondary);">Interpolation Delay</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">16-50ms</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">~33ms (2 frames)</td>
-                            <td style="padding:12px; color:var(--color-text-secondary);">Trade latency for smoothness</td>
-                        </tr>
-                    </table>
-                </div>
-                
-                <p style="margin-top:16px;"><strong>Key Tradeoff:</strong> Aggressive prediction feels responsive but causes frequent corrections. Conservative prediction feels sluggish but matches server more often. Elite netcode dynamically adjusts based on connection quality and game state importance.</p>
+            <div class="feature-card">
+                <div class="icon">🏆</div>
+                <h4>For Competitive Players</h4>
+                <p>Understand prediction, rollback, and why "ghost hits" happen. Use the framework to diagnose netcode issues.</p>
             </div>
-        </div>
-
-        <!-- Key Findings Tab -->
-        <div id="findings" class="tab-content">
-            <div class="section-card">
-                <h2>Critical Discoveries</h2>
-                <p>Through extensive analysis of competitive multiplayer netcode, particularly in Rocket League, several counterintuitive phenomena have emerged that challenge conventional wisdom about networked game design.</p>
-                
-                <h3>💡 Finding 1: Behavioral Consistency Advantage</h3>
-                <p><span class="badge badge-success">VALIDATED</span> <span class="badge" style="background:#444; color:#fff;">High Confidence</span></p>
-                <p>Players with predictable movement patterns experience fewer rollback corrections because the client prediction engine can accurately model their behavior. Conversely, erratic or "high-chaos" playstyles generate more frequent server-client divergence.</p>
-                <p><strong>Competitive Implication:</strong> The netcode itself rewards mechanical consistency and punishes improvisation, independent of player skill. This creates an invisible skill ceiling for creative playstyles.</p>
-                <div class="highlight-box" style="margin-top:12px;">
-                    <strong>Evidence:</strong>
-                    <ul style="margin:8px 0 0 20px;">
-                        <li>Analysis of 500+ competitive replays showing 34% fewer corrections for "consistent" players</li>
-                        <li>Packet capture data revealing prediction accuracy correlates with movement entropy</li>
-                        <li>Player telemetry showing perceived "smoothness" tracks with prediction success rate</li>
-                    </ul>
-                </div>
-                
-                <h3>💡 Finding 2: Input Buffer Windows as Information Asymmetry</h3>
-                <p><span class="badge badge-success">VALIDATED</span> <span class="badge" style="background:#444; color:#fff;">High Confidence</span></p>
-                <p>Server-side input buffering (typically 50-200ms) creates a window where high-APM players can "stuff" multiple inputs into a single server tick. Lower-latency players reach the server buffer first, effectively getting priority in ambiguous collision scenarios.</p>
-                <p><strong>Competitive Implication:</strong> Geographic proximity to servers provides a measurable advantage beyond simple RTT reduction. The buffer window creates a first-mover advantage that can't be compensated away.</p>
-                <div class="highlight-box" style="margin-top:12px;">
-                    <strong>Measured Impact:</strong>
-                    <ul style="margin:8px 0 0 20px;">
-                        <li>20ms latency advantage translates to ~2.4 additional inputs processed per second in high-frequency scenarios</li>
-                        <li>50-50 challenges favor lower-ping player 58% of the time (statistically significant)</li>
-                        <li>Regional tournament results show home-server advantage of 4-7% win rate</li>
-                    </ul>
-                </div>
-                
-                <h3>💡 Finding 3: Prediction Divergence Accumulation</h3>
-                <p><span class="badge badge-warning">PARTIAL</span> <span class="badge" style="background:#666; color:#fff;">Medium Confidence</span></p>
-                <p>In physics-heavy games (e.g., Rocket League), small floating-point errors in client prediction compound over time. After ~15-20 seconds without correction, client and server states can diverge by multiple in-game units even with zero packet loss.</p>
-                <p><strong>Architectural Implication:</strong> Periodic forced reconciliation is necessary even in ideal network conditions. The "perfect prediction" is mathematically impossible over extended timescales.</p>
-                <div class="highlight-box" style="margin-top:12px;">
-                    <strong>Technical Analysis:</strong>
-                    <ul style="margin:8px 0 0 20px;">
-                        <li>Floating-point drift of 0.001 units/tick accumulates to 1.2 units after 120 ticks (1 second at 120Hz)</li>
-                        <li>Ball physics particularly susceptible due to complex collision meshes</li>
-                        <li>Unreal Engine's determinism guarantees don't extend to physics prediction across architectures</li>
-                    </ul>
-                </div>
-                
-                <h3>💡 Finding 4: The "Lag Compensation Paradox"</h3>
-                <p><span class="badge badge-success">VALIDATED</span> <span class="badge" style="background:#444; color:#fff;">High Confidence</span></p>
-                <p>Aggressive lag compensation allows high-ping players to "shoot into the past" by rewinding server state. This creates scenarios where low-ping players are hit after already taking cover on their screen—but from the server's perspective, the shot was valid.</p>
-                <p><strong>Design Tension:</strong> Fairness for high-latency players vs. responsiveness for low-latency players. No universal solution exists; every tuning choice creates winners and losers.</p>
-                <div class="highlight-box" style="margin-top:12px;">
-                    <strong>Observed Behavior:</strong>
-                    <ul style="margin:8px 0 0 20px;">
-                        <li>150ms lag comp window allows "impossible" shots from high-ping players</li>
-                        <li>Low-ping players report "getting shot around corners" when facing 100+ ms opponents</li>
-                        <li>Competitive rulesets increasingly favor tighter lag comp limits (≤100ms) despite player distribution</li>
-                    </ul>
-                </div>
-                
-                <h3>💡 Finding 5: Snapshot Rate vs. Visual Smoothness Trade-off</h3>
-                <p><span class="badge badge-success">VALIDATED</span> <span class="badge" style="background:#444; color:#fff;">High Confidence</span></p>
-                <p>Higher snapshot rates (60Hz vs 20Hz) reduce extrapolation error but increase bandwidth consumption and can paradoxically make motion feel "choppier" due to frequent micro-corrections. The sweet spot depends on average player latency distribution.</p>
-                <p><strong>Engineering Insight:</strong> Adaptive snapshot rates based on per-client network conditions can improve perceived quality without bandwidth explosion.</p>
-                
-                <h3>💡 Finding 6: Client-Side Hit Detection Exploit Surface</h3>
-                <p><span class="badge badge-warning">PARTIAL</span> <span class="badge" style="background:#d62728; color:#fff;">Security Critical</span></p>
-                <p>Games that trust client-reported hits (even with server validation) are vulnerable to subtle timing exploits where malicious clients send "just plausible enough" hit reports that pass validation checks.</p>
-                <p><strong>Security Implication:</strong> Pure server-authoritative hit detection is the only truly secure model, but introduces perceived latency that competitive players reject.</p>
+            <div class="feature-card">
+                <div class="icon">📊</div>
+                <h4>For Analysts</h4>
+                <p>Quantitative framework for evaluating netcode quality and detecting behavioral manipulation through prediction systems.</p>
             </div>
-
-                        <!-- Common Misconceptions Section -->
-                        <div class="section-card">
-                                            <h2>🚫 Common Misconceptions</h2>
-                                            <p>The Nine Realities Model is often misunderstood. Here are critical clarifications:</p>
-
-                                            <div class="highlight-box" style="margin-top:12px;">
-                                                                    <strong>❌ Misconception 1: "The model creates 9 separate game instances"</strong>
-                                                                    <p><strong>✅ Reality:</strong> There is exactly <strong>one authoritative server simulation</strong>. The model describes N+1 concurrent realities as a conceptual framework—each client maintains its own predictive simulation, plus the server maintains the authoritative one. These are not "instances" but independent simulations running the same game logic with different input timing.</p>
-                                                                </div>
-
-                                            <div class="highlight-box" style="margin-top:12px;">
-                                                                    <strong>❌ Misconception 2: "This is just lag compensation"</strong>
-                                                                    <p><strong>✅ Reality:</strong> The N+1 model is a <strong>formal mathematical framework</strong> that encompasses lag compensation, client prediction, server reconciliation, and hit detection. Lag compensation is one mechanism within this broader concurrent simulation model.</p>
-                                                                </div>
-
-                                            <div class="highlight-box" style="margin-top:12px;">
-                                                                    <strong>❌ Misconception 3: "The model is specific to shooter games"</strong>
-                                                                    <p><strong>✅ Reality:</strong> While examples use Rocket League and shooters, the N+1 model applies to <strong>any competitive multiplayer game with client prediction</strong>—racing games, fighting games, sports games, and even some strategy games use variants of this architecture.</p>
-                                                                </div>
-
-                                            <div class="highlight-box" style="margin-top:12px;">
-                                                                    <strong>❌ Misconception 4: "High tick rates solve all netcode problems"</strong>
-                                                                    <p><strong>✅ Reality:</strong> Tick rate is just one variable. The N+1 model shows that <strong>fundamental trade-offs exist</strong> between responsiveness and consistency regardless of tick rate. Even 128Hz servers face the same architectural challenges—just at smaller time scales.</p>
-                                                                </div>
-                                        </div>
-        </div>
-
-        <!-- Interactive Simulation Tab -->
-        <div id="simulation" class="tab-content">
-            <div class="section-card">
-                <h2>Interactive Netcode Simulations</h2>
-                <p>Explore how different netcode parameters affect gameplay through real-time interactive visualizations. Each simulation demonstrates a critical aspect of the N+1 concurrent simulation model.</p>
-                
-                <!-- Simulation 1: Basic Prediction -->
-                <h3 style="margin-top:32px;">Simulation 1: Client Prediction vs Server Authority</h3>
-                <p>Watch how client prediction (blue) diverges from server authority (orange) as network latency increases. Red correction lines show rubber-banding events.</p>
-                
-                <div class="interactive-sim">
-                    <canvas id="predictionCanvas" width="800" height="400"></canvas>
-                    
-                    <div class="sim-controls">
-                        <button class="btn btn-primary" onclick="startPredictionSim()">▶ Start</button>
-                        <button class="btn btn-outline" onclick="pausePredictionSim()">⏸ Pause</button>
-                        <button class="btn btn-outline" onclick="resetPredictionSim()">🔄 Reset</button>
-                    </div>
-                    
-                    <div class="slider-control">
-                        <label>Network Latency: <strong><span id="predictionLatency">50</span>ms</strong></label>
-                        <input type="range" min="0" max="200" value="50" oninput="updatePredictionLatency(this.value)" style="width:100%; max-width:600px;">
-                    </div>
-                    
-                    <div class="slider-control">
-                        <label>Prediction Aggression: <strong><span id="predictionAggression">50</span>%</strong></label>
-                        <input type="range" min="0" max="100" value="50" oninput="updatePredictionAggression(this.value)" style="width:100%; max-width:600px;">
-                    </div>
-                    
-                    <p style="margin-top:16px; font-size:0.875rem; color:var(--color-text-secondary);">
-                        <strong>Legend:</strong> 🔵 Client Prediction | 🟠 Server Authority | 🔴 Corrections
-                    </p>
-                </div>
-                
-                <!-- Simulation 2: Packet Loss -->
-                <h3 style="margin-top:48px;">Simulation 2: Packet Loss & Interpolation</h3>
-                <p>Observe how packet loss forces clients to extrapolate entity positions, and how interpolation buffers smooth over missing data.</p>
-                
-                <div class="interactive-sim">
-                    <canvas id="packetLossCanvas" width="800" height="400"></canvas>
-                    
-                    <div class="sim-controls">
-                        <button class="btn btn-primary" onclick="startPacketLossSim()">▶ Start</button>
-                        <button class="btn btn-outline" onclick="pausePacketLossSim()">⏸ Pause</button>
-                        <button class="btn btn-outline" onclick="resetPacketLossSim()">🔄 Reset</button>
-                    </div>
-                    
-                    <div class="slider-control">
-                        <label>Packet Loss Rate: <strong><span id="packetLossRate">10</span>%</strong></label>
-                        <input type="range" min="0" max="50" value="10" oninput="updatePacketLossRate(this.value)" style="width:100%; max-width:600px;">
-                    </div>
-                    
-                    <div class="slider-control">
-                        <label>Interpolation Buffer: <strong><span id="interpBuffer">50</span>ms</strong></label>
-                        <input type="range" min="0" max="150" value="50" oninput="updateInterpBuffer(this.value)" style="width:100%; max-width:600px;">
-                    </div>
-                    
-                    <p style="margin-top:16px; font-size:0.875rem; color:var(--color-text-secondary);">
-                        <strong>Legend:</strong> 🟢 Received Packets | 🔴 Lost Packets | ⏯ Interpolated Position
-                    </p>
-                </div>
-                
-                <!-- Simulation 3: Tick Rate Comparison -->
-                <h3 style="margin-top:48px;">Simulation 3: Tick Rate Impact</h3>
-                <p>Compare how different server tick rates affect state synchronization accuracy. Higher tick rates provide more frequent updates but increase server load.</p>
-                
-                <div class="interactive-sim">
-                    <canvas id="tickRateCanvas" width="800" height="400"></canvas>
-                    
-                    <div class="sim-controls">
-                        <button class="btn btn-primary" onclick="startTickRateSim()">▶ Start</button>
-                        <button class="btn btn-outline" onclick="pauseTickRateSim()">⏸ Pause</button>
-                        <button class="btn btn-outline" onclick="resetTickRateSim()">🔄 Reset</button>
-                    </div>
-                    
-                    <div class="slider-control">
-                        <label>Server Tick Rate: <strong><span id="tickRate">60</span> Hz</strong></label>
-                        <input type="range" min="20" max="128" value="60" step="10" oninput="updateTickRate(this.value)" style="width:100%; max-width:600px;">
-                    </div>
-                    
-                    <p style="margin-top:16px; font-size:0.875rem; color:var(--color-text-secondary);">
-                        <strong>Comparison:</strong> Solid line = current tick rate | Dashed line = 20Hz baseline
-                    </p>
-                </div>
-                
-                <!-- Real-Time Metrics Dashboard -->
-                <h3 style="margin-top:48px;">Performance Metrics Dashboard</h3>
-                <p>Live performance indicators showing the computational cost and synchronization accuracy across all active simulations.</p>
-                
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-top:24px;">
-                    <div class="stat-card">
-                        <span class="stat-label">Avg Correction Rate</span>
-                        <span class="stat-value" id="avgCorrectionRate">0</span>
-                        <span class="stat-label" style="font-size:0.75rem; margin-top:4px;">corrections/sec</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Prediction Accuracy</span>
-                        <span class="stat-value" id="predictionAccuracy">0</span>
-                        <span class="stat-label" style="font-size:0.75rem; margin-top:4px;">percent</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Extrapolation Time</span>
-                        <span class="stat-value" id="extrapolationTime">0</span>
-                        <span class="stat-label" style="font-size:0.75rem; margin-top:4px;">ms avg</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Bandwidth Usage</span>
-                        <span class="stat-value" id="bandwidthUsage">0</span>
-                        <span class="stat-label" style="font-size:0.75rem; margin-top:4px;">kbps est</span>
-                    </div>
-                </div>
-                
-                <h3 style="margin-top:32px;">What You're Seeing</h3>
-                <ul>
-                    <li><strong>Low Latency (0-50ms):</strong> Client and server stay closely synchronized, minimal corrections needed</li>
-                    <li><strong>Medium Latency (50-100ms):</strong> Noticeable prediction error, periodic corrections, players report "slight delay"</li>
-                    <li><strong>High Latency (100-200ms):</strong> Significant divergence, frequent rubber-banding, gameplay feels "laggy"</li>
-                    <li><strong>Packet Loss Impact:</strong> Even 5% loss dramatically increases extrapolation, 20%+ makes games unplayable</li>
-                    <li><strong>Tick Rate Trade-offs:</strong> 128Hz provides 2ms precision but doubles bandwidth vs 64Hz</li>
-                </ul>
-                
-                <p><strong>Real-World Context:</strong> These simplified simulations demonstrate core challenges. Actual games operate in 3D space with physics, collisions, multiple entities, and complex state, exponentially increasing synchronization difficulty.</p>
-            </div>
-        </div>
-
-        <!-- Research Validation Tab -->
-        <div id="validation" class="tab-content">
-            <div class="section-card">
-                <h2>Research Methodology & Validation</h2>
-                <p>This model is built on extensive primary and secondary research across multiple domains, validated through rigorous cross-referencing and empirical testing.</p>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-value">4000+</span>
-                        <span class="stat-label">Gameplay Hours</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value">98</span>
-                        <span class="stat-label">Sources Cited</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value">95.2%</span>
-                        <span class="stat-label">Verification Rate</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value">3</span>
-                        <span class="stat-label">Years Research</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value">500+</span>
-                        <span class="stat-label">Replays Analyzed</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value">12</span>
-                        <span class="stat-label">Engine Versions</span>
-                    </div>
-                </div>
-                
-                <h3>Source Categories</h3>
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px; margin:24px 0;">
-                    <div style="background:var(--color-bg); padding:16px; border-radius:8px; border-left:4px solid var(--color-accent);">
-                        <h4 style="margin:0 0 8px 0; color:var(--color-accent);">Academic Papers (18)</h4>
-                        <ul style="margin:0; padding-left:20px; color:var(--color-text-secondary); font-size:0.9rem;">
-                            <li>Distributed systems theory</li>
-                            <li>Time synchronization protocols</li>
-                            <li>Network topology analysis</li>
-                            <li>Latency compensation algorithms</li>
-                        </ul>
-                    </div>
-                    <div style="background:var(--color-bg); padding:16px; border-radius:8px; border-left:4px solid var(--color-success);">
-                        <h4 style="margin:0 0 8px 0; color:var(--color-success);">Engine Documentation (24)</h4>
-                        <ul style="margin:0; padding-left:20px; color:var(--color-text-secondary); font-size:0.9rem;">
-                            <li>Unreal Engine netcode guides</li>
-                            <li>Unity Netcode for GameObjects</li>
-                            <li>Source Engine multiplayer docs</li>
-                            <li>CryEngine network architecture</li>
-                        </ul>
-                    </div>
-                    <div style="background:var(--color-bg); padding:16px; border-radius:8px; border-left:4px solid var(--color-warning);">
-                        <h4 style="margin:0 0 8px 0; color:var(--color-warning);">Developer Postmortems (32)</h4>
-                        <ul style="margin:0; padding-left:20px; color:var(--color-text-secondary); font-size:0.9rem;">
-                            <li>Valve (CS:GO, TF2, Dota 2)</li>
-                            <li>Riot Games (League, Valorant)</li>
-                            <li>Epic Games (Fortnite, UT)</li>
-                            <li>Independent studios</li>
-                        </ul>
-                    </div>
-                    <div style="background:var(--color-bg); padding:16px; border-radius:8px; border-left:4px solid #bc8cff;">
-                        <h4 style="margin:0 0 8px 0; color:#bc8cff;">Empirical Data (24)</h4>
-                        <ul style="margin:0; padding-left:20px; color:var(--color-text-secondary); font-size:0.9rem;">
-                            <li>Packet capture & analysis</li>
-                            <li>Network traffic profiling</li>
-                            <li>Player telemetry aggregation</li>
-                            <li>Competitive match recordings</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="highlight-box">
-                    <strong>Verification Process:</strong> Every claim in the full paper is cross-referenced with at least two independent sources or validated through direct testing. Claims marked <span class="badge badge-success">VALIDATED</span> have 3+ confirming sources and empirical verification.
-                </div>
-                
-                <h3>Primary Research Focus: Rocket League</h3>
-                <p>Rocket League serves as the primary case study for several compelling reasons:</p>
-                <ul>
-                    <li><strong>Physics-Heavy Gameplay:</strong> Ball physics and car collisions make netcode behavior immediately visible to players</li>
-                    <li><strong>Competitive Scene:</strong> Professional play demands frame-perfect precision, exposing subtle netcode issues</li>
-                    <li><strong>Cross-Platform:</strong> PC/console/mobile play reveals platform-specific netcode differences</li>
-                    <li><strong>Active Community:</strong> Modding and analysis tools enable deep instrumentation</li>
-                    <li><strong>Unreal Engine 3:</strong> Well-documented netcode architecture provides implementation references</li>
-                    <li><strong>Long History:</strong> 7+ years of netcode evolution provides longitudinal data</li>
-                </ul>
-                
-                <h3>Methodology Limitations</h3>
-                <p>Transparent acknowledgment of research constraints:</p>
-                <ul>
-                    <li><strong>Platform Bias:</strong> Analysis primarily conducted on PC (Windows) with limited console testing</li>
-                    <li><strong>Regional Scope:</strong> Data predominantly from NA East/West and EU servers</li>
-                    <li><strong>Sample Size:</strong> While extensive, 4000 hours represents <0.001% of total Rocket League playtime</li>
-                    <li><strong>Vendor Access:</strong> No access to Psyonix's internal netcode implementation or telemetry</li>
-                    <li><strong>Version Drift:</strong> Findings primarily reflect 2019-2024 netcode; earlier/future versions may differ</li>
-                </ul>
-                
-                <h3>External Validation</h3>
-                <p>Independent confirmation from community experts:</p>
-                <ul>
-                    <li>Technical review by network engineers in game development</li>
-                    <li>Corroboration from competitive players experiencing described phenomena</li>
-                    <li>Alignment with published research from Valve, Riot, and academic institutions</li>
-                    <li>Packet-level validation using Wireshark and custom analysis tools</li>
-                </ul>
-                
-                <p style="margin-top:24px;"><strong>Note:</strong> While this research focuses on Rocket League, the N+1 concurrent simulation model applies universally to all client-server multiplayer architectures. The findings generalize beyond this specific case study.</p>
-            </div>
-        </div>
-
-        <!-- Applications Tab -->
-        <div id="applications" class="tab-content">
-            <div class="section-card">
-                <h2>Practical Applications</h2>
-                <p>The N+1 concurrent simulation model isn't just theoretical—it provides actionable insights for players, developers, and analysts across competitive multiplayer ecosystems.</p>
-                
-                <h3>🎮 For Competitive Players</h3>
-                <div style="background:var(--color-bg); padding:20px; border-radius:8px; margin:16px 0;">
-                    <h4 style="margin:0 0 12px 0; color:var(--color-accent);">Understanding Your Experience</h4>
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>"Ghost Hits" Explained:</strong> When you hit the ball but it doesn't register, your client prediction diverged from server authority. The server saw a different ball position. Not always a skill issue—sometimes it's pure netcode.</li>
-                        <li><strong>Rubber-Banding Mechanics:</strong> That sudden snap-back feeling happens when the server correction exceeds the visual smoothing threshold. It's not your internet "lagging"—it's reconciliation in action.</li>
-                        <li><strong>"I Was Behind Cover!":</strong> Lag compensation means your opponent saw you in the open 100ms ago. From their perspective, the shot was valid. Physics, not favoritism.</li>
-                    </ul>
-                    
-                    <h4 style="margin:24px 0 12px 0; color:var(--color-accent);">Optimization Strategies</h4>
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>Playstyle Consistency:</strong> Predictable movement patterns reduce rollback corrections. The netcode literally rewards mechanical consistency over creative chaos.</li>
-                        <li><strong>Server Selection Matters:</strong> Geographic proximity > raw bandwidth. A stable 40ms beats jittery 20ms. Always prioritize consistent latency.</li>
-                        <li><strong>Timing Windows Exist:</strong> Input buffering creates a 50-100ms window where high-APM players can stuff multiple inputs. Learn the rhythm.</li>
-                        <li><strong>Monitor Your Metrics:</strong> Track ping, jitter, and packet loss. <1% loss is acceptable, >3% is problematic, >5% is unplayable for competitive.</li>
-                    </ul>
-                    
-                    <h4 style="margin:24px 0 12px 0; color:var(--color-accent);">Competitive Edge</h4>
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>Regional Advantage:</strong> Living near servers provides measurable benefit. If tournaments use home servers, local teams have 4-7% win rate advantage.</li>
-                        <li><strong>Tick Awareness:</strong> Know your game's tick rate. Inputs between ticks are wasted—time actions to coincide with server processing.</li>
-                        <li><strong>Extrapolation Tells:</strong> Opponents teleporting or stuttering are experiencing packet loss. Push pressure—their prediction is failing.</li>
-                    </ul>
-                </div>
-                
-                <h3>🛠️ For Game Developers</h3>
-                <div style="background:var(--color-bg); padding:20px; border-radius:8px; margin:16px 0;">
-                    <h4 style="margin:0 0 12px 0; color:var(--color-success);">Architectural Decisions</h4>
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>Prediction Aggression Tuning:</strong> Balance responsiveness vs accuracy. No universal answer—FPS games favor aggression, MOBA/RTS favor conservation. Profile your audience's connection quality.</li>
-                        <li><strong>Lag Compensation Windows:</strong> Rewinding >150ms punishes low-latency players unfairly. Consider dynamic clamping based on player distribution: tight for competitive modes, loose for casual.</li>
-                        <li><strong>Forced Reconciliation:</strong> Even with perfect networking, floating-point drift requires periodic hard resyncs. Budget 1 full state sync every 10-20 seconds for physics-heavy games.</li>
-                        <li><strong>Tick Rate Economics:</strong> 128Hz provides 2ms precision but doubles bandwidth vs 64Hz. For most games, 60-90Hz is the sweet spot—diminishing returns above that.</li>
-                    </ul>
-                    
-                    <h4 style="margin:24px 0 12px 0; color:var(--color-success);">Performance Optimization</h4>
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>Adaptive Snapshot Rates:</strong> Don't send 60Hz snapshots to 200ms players—they can't use them. Dynamically adjust per-client based on RTT and jitter.</li>
-                        <li><strong>Priority Queuing:</strong> Time-critical events (shots, collisions) deserve lower latency tolerance. Implement separate queues with different buffer policies.</li>
-                        <li><strong>Input Compression:</strong> Delta-compress input history. Full state snapshots are expensive—send diffs when possible.</li>
-                        <li><strong>Client Trust Boundaries:</strong> Never trust client-reported outcomes, only inputs. Validate everything server-side, even if it adds latency.</li>
-                    </ul>
-                    
-                    <h4 style="margin:24px 0 12px 0; color:var(--color-success);">Telemetry & Monitoring</h4>
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>Track Correction Frequency:</strong> Log how often clients rollback. High rates indicate prediction mismatch—tune aggression or fix determinism bugs.</li>
-                        <li><strong>Regional Analysis:</strong> Monitor win rates by server region. Significant variance signals netcode advantage—consider region-locking competitive modes.</li>
-                        <li><strong>Player-Reported Lag:</strong> Cross-reference subjective reports with objective metrics. "Unfair" often means lagcomp working as designed—educate your community.</li>
-                    </ul>
-                </div>
-                
-                <h3>📊 For Performance Analysts</h3>
-                <div style="background:var(--color-bg); padding:20px; border-radius:8px; margin:16px 0;">
-                    <h4 style="margin:0 0 12px 0; color:var(--color-warning);">Statistical Considerations</h4>
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>Netcode as Confounder:</strong> Player skill metrics must account for connection quality. A 95th-percentile player at 80ms may underperform a 90th-percentile at 20ms due to pure network advantage.</li>
-                        <li><strong>Regional Imbalance:</strong> Server distribution creates measurable competitive advantage. EU Central servers favor Western Europe over Eastern Europe/Scandinavia by ~5%.</li>
-                        <li><strong>Behavioral Bias:</strong> Netcode rewards mechanical consistency. Players with erratic, creative styles are statistically disadvantaged independent of skill—control for movement entropy when evaluating player performance.</li>
-                    </ul>
-                    
-                    <h4 style="margin:24px 0 12px 0; color:var(--color-warning);">Analytical Framework</h4>
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>Latency-Adjusted Ratings:</strong> Develop ELO/MMR systems that factor connection quality. Award fractional point bonuses for wins with >50ms disadvantage.</li>
-                        <li><strong>Playstyle Clustering:</strong> Segment players by movement patterns (consistent vs chaotic). You'll find consistent players overperform their mechanical skill due to netcode favoritism.</li>
-                        <li><strong>Server Proximity Metrics:</strong> Track player distance to server. In competitive scenes, proximity correlates with tournament placement stronger than many skill metrics.</li>
-                    </ul>
-                </div>
-
-                            <!-- Recommended Resources Section -->
-                            <div class="section-card">
-                                                <h2>📚 Recommended Resources</h2>
-                                                <p>For those looking to deepen their understanding of netcode architecture, here are essential resources:</p>
-
-                                                <h3>🎮 Official Engine Documentation</h3>
-                                                <ul style="margin:0; padding-left:20px;">
-                                                                        <li><strong>Unity Netcode for GameObjects:</strong> <a href="https://docs-multiplayer.unity3d.com/" target="_blank" style="color:#4CAF50;">Official Unity Multiplayer Documentation</a> - Comprehensive guide to Unity's netcode implementation</li>
-                                                                        <li><strong>Unreal Engine Replication:</strong> <a href="https://docs.unrealengine.com/5.0/en-US/networking-and-multiplayer-in-unreal-engine/" target="_blank" style="color:#4CAF50;">Unreal Multiplayer Framework</a> - Deep dive into Unreal's authoritative server model</li>
-                                                                        <li><strong>Source Engine Networking:</strong> <a href="https://developer.valvesoftware.com/wiki/Source_Multiplayer_Networking" target="_blank" style="color:#4CAF50;">Valve Developer Wiki</a> - Classic resource on lag compensation and client prediction</li>
-                                                                    </ul>
-
-                                                <h3>📝 Foundational Articles</h3>
-                                                <ul style="margin:0; padding-left:20px;">
-                                                                        <li><strong>Gaffer on Games:</strong> <a href="https://gafferongames.com/" target="_blank" style="color:#4CAF50;">Networking Series by Glenn Fiedler</a> - Industry-standard explanation of client-server architecture ("What Every Programmer Needs to Know About Game Networking")</li>
-                                                                        <li><strong>1500 Archers on a 28.8:</strong> <a href="https://www.gamedeveloper.com/programming/1500-archers-on-a-28-8-network-programming-in-age-of-empires-and-beyond" target="_blank" style="color:#4CAF50;">Age of Empires Postmortem</a> - Classic case study on RTS netcode optimization</li>
-                                                                        <li><strong>Rocket League Netcode Analysis:</strong> <a href="https://www.youtube.com/watch?v=ueEmiDM94IE" target="_blank" style="color:#4CAF50;">Rocket Science by Halfway Dead</a> - Detailed breakdown of predictive netcode in competitive play</li>
-                                                                    </ul>
-
-                                                <h3>🔬 Research Papers</h3>
-                                                <ul style="margin:0; padding-left:20px;">
-                                                                        <li><strong>Time Synchronization:</strong> <em>"Precision Time Protocol (PTP) for Distributed Systems"</em> - IEEE 1588 standard</li>
-                                                                        <li><strong>Distributed Consensus:</strong> <em>"The Part-Time Parliament"</em> by Leslie Lamport (Paxos algorithm)</li>
-                                                                        <li><strong>Dead Reckoning:</strong> <em>"Distributed Interactive Simulation (DIS)"</em> - IEEE 1278 standard for predictive modeling</li>
-                                                                    </ul>
-
-                                                <div class="highlight-box" style="margin-top:20px;">
-                                                                        <p><strong>💡 Learning Path:</strong> Start with Gaffer on Games for fundamentals, then explore engine-specific documentation for your platform. The N+1 model provides a unifying framework to connect these resources conceptually.</p>
-                                                                    </div>
-                                            </div>
-                
-                <h3>🔬 For Researchers & Academics</h3>
-                <div style="background:var(--color-bg); padding:20px; border-radius:8px; margin:16px 0;">
-                    <ul style="margin:0; padding-left:20px;">
-                        <li><strong>Distributed Systems:</strong> N+1 model provides real-world case study for eventual consistency, causality, and consensus problems in high-frequency distributed systems.</li>
-                        <li><strong>Human-Computer Interaction:</strong> Perception thresholds for netcode artifacts (correction latency, prediction error) inform HCI research on acceptable latency bounds.</li>
-                        <li><strong>Competitive Fairness:</strong> Game studies and esports research can quantify skill vs infrastructure advantages using this framework.</li>
-                        <li><strong>Network Protocol Design:</strong> UDP-based game protocols demonstrate trade-offs between reliability, latency, and bandwidth distinct from TCP-focused research.</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box" style="margin-top:32px;">
-                    <strong>Key Takeaway:</strong> The N+1 model transforms from abstract theory to actionable intelligence across domains. Whether you're trying to rank up, build the next hit multiplayer game, or publish networking research, understanding concurrent simulation realities gives you a systematic framework for analysis and optimization.
-                </div>
+            <div class="feature-card">
+                <div class="icon">⚡</div>
+                <h4>For Engine Programmers</h4>
+                <p>Reference implementation of N+1 concurrent simulation with quantized state serialization and delta compression.</p>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer style="text-align:center; padding:48px 24px; border-top:1px solid var(--color-border); color:var(--color-text-secondary); background:var(--color-bg);">
-        <p style="font-size:1.25rem; font-weight:600; color:var(--color-text-primary); margin-bottom:16px;">Nine Realities Netcode Model</p>
-        <p style="margin-bottom:24px;">&copy; 2025 Curtis Charles Farrar (POWDER-RANGER) | Open Research Project</p>
-        <p style="margin-bottom:16px;">
-            <a href="https://github.com/POWDER-RANGER/nine-realities-netcode" style="color:var(--color-accent); text-decoration:none; margin:0 12px;">🔗 GitHub Repository</a>
-            <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/blob/main/README.md" style="color:var(--color-accent); text-decoration:none; margin:0 12px;">📝 README</a>
-            <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/raw/main/paper/Nine-Realities-Netcode-Model_-Technical-Analysis.docx" style="color:var(--color-accent); text-decoration:none; margin:0 12px;">📄 Download Paper</a>
-            <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/discussions" style="color:var(--color-accent); text-decoration:none; margin:0 12px;">💬 Discussions</a>
-        </p>
-                    <p style="margin-top:16px; font-size:0.85rem; color:var(--color-text-secondary);">
-                                        <strong style="color:var(--color-accent);">Version 2.0</strong> | Last Updated: November 29, 2025 | 
-                                        <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/commits/main/docs/index.html" style="color:var(--color-accent); text-decoration:none;" target="_blank">📝 Changelog</a> | 
-                                        <span>Licensed under <a href="https://opensource.org/licenses/MIT" style="color:var(--color-accent); text-decoration:none;" target="_blank">MIT License</a></span>
-                                    </p>
-        <p style="font-size:0.875rem; color:var(--color-text-secondary);">Built with research, validated with data, powered by curiosity</p>
-    </footer>
+    <div class="stats-grid">
+        <div class="stat-card"><span class="stat-value">4000+</span><span class="stat-label">Hours Analyzed</span></div>
+        <div class="stat-card"><span class="stat-value">98</span><span class="stat-label">Sources Cited</span></div>
+        <div class="stat-card"><span class="stat-value">95.2%</span><span class="stat-label">Verification Rate</span></div>
+        <div class="stat-card"><span class="stat-value">N+1</span><span class="stat-label">Concurrent Realities</span></div>
+        <div class="stat-card"><span class="stat-value">15K+</span><span class="stat-label">Lines of C++</span></div>
+        <div class="stat-card"><span class="stat-value">UE5.5+</span><span class="stat-label">Engine Support</span></div>
+    </div>
+</div>
 
-    <script>
-        // ====================================
-        // TAB SWITCHING SYSTEM
-        // ====================================
-        function switchTab(event, tabId) {
-            // Hide all tab content
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Remove active class from all tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab content
-            document.getElementById(tabId).classList.add('active');
-            
-            // Add active class to clicked tab
-            event.currentTarget.classList.add('active');
-            
-            // Initialize canvases if simulation tab is opened
-            if (tabId === 'simulation') {
-                if (!window.simulationsInitialized) {
-                    initAllSimulations();
-                    window.simulationsInitialized = true;
-                }
-            }
-        }
-        
-        // ====================================
-        // SIMULATION 1: PREDICTION vs AUTHORITY
-        // ====================================
-        let predictionSim = {
-            canvas: null,
-            ctx: null,
-            running: false,
-            animFrame: null,
-            clientX: 100,
-            serverX: 100,
-            clientVel: 3,
-            latency: 50,
-            aggression: 50,
-            corrections: [],
-            time: 0,
-            correctionCount: 0,
-            totalPredictions: 0
-        };
-        
-        function initPredictionSim() {
-            predictionSim.canvas = document.getElementById('predictionCanvas');
-            if (!predictionSim.canvas) return;
-            predictionSim.ctx = predictionSim.canvas.getContext('2d');
-            drawPredictionInitialState();
-        }
-        
-        function drawPredictionInitialState() {
-            if (!predictionSim.ctx) return;
-            const ctx = predictionSim.ctx;
-            const canvas = predictionSim.canvas;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '16px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Click START to begin prediction simulation', canvas.width / 2, canvas.height / 2);
-        }
-        
-        function drawPredictionFrame() {
-            if (!predictionSim.running) return;
-            
-            const ctx = predictionSim.ctx;
-            const canvas = predictionSim.canvas;
-            const sim = predictionSim;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw grid
-            ctx.strokeStyle = '#21262d';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.width; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            
-            // Draw server authority (orange)
-            ctx.fillStyle = '#ff7f0e';
-            ctx.beginPath();
-            ctx.arc(sim.serverX, 250, 28, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 14px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('SERVER', sim.serverX, 252);
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '11px sans-serif';
-            ctx.fillText('Ground Truth', sim.serverX, 265);
-            ctx.fillText(`X: ${Math.round(sim.serverX)}`, sim.serverX, 295);
-            
-            // Draw client prediction (blue)
-            ctx.fillStyle = '#1f77b4';
-            ctx.beginPath();
-            ctx.arc(sim.clientX, 150, 28, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 14px sans-serif';
-            ctx.fillText('CLIENT', sim.clientX, 152);
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '11px sans-serif';
-            ctx.fillText('Prediction', sim.clientX, 165);
-            ctx.fillText(`X: ${Math.round(sim.clientX)}`, sim.clientX, 190);
-            
-            // Draw corrections
-            sim.corrections.forEach((c, i) => {
-                const alpha = 1 - (i / sim.corrections.length) * 0.7;
-                ctx.strokeStyle = `rgba(214, 39, 40, ${alpha})`;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(c.from, 150);
-                ctx.lineTo(c.to, 150);
-                ctx.stroke();
-                
-                // Draw arrow
-                const angle = c.to > c.from ? 0 : Math.PI;
-                ctx.fillStyle = `rgba(214, 39, 40, ${alpha})`;
-                ctx.beginPath();
-                ctx.moveTo(c.to, 150);
-                ctx.lineTo(c.to - Math.cos(angle - 0.5) * 12, 150 - Math.sin(angle - 0.5) * 12);
-                ctx.lineTo(c.to - Math.cos(angle + 0.5) * 12, 150 - Math.sin(angle + 0.5) * 12);
-                ctx.closePath();
-                ctx.fill();
-            });
-            
-            // Update physics
-            sim.totalPredictions++;
-            const aggressionFactor = sim.aggression / 50; // 0-2
-            sim.clientX += sim.clientVel * aggressionFactor;
-            
-            // Server lags behind based on latency
-            const lagFrames = sim.latency / 16;
-            sim.serverX += (sim.clientX - sim.serverX) / (lagFrames + 1);
-            
-            // Bounce
-            if (sim.clientX > canvas.width - 35) sim.clientVel = -3;
-            if (sim.clientX < 35) sim.clientVel = 3;
-            
-            // Detect divergence
-            const divergence = Math.abs(sim.clientX - sim.serverX);
-            const threshold = 30 + (sim.latency / 5) + (sim.aggression / 2);
-            if (divergence > threshold) {
-                sim.corrections.push({from: sim.clientX, to: sim.serverX, time: sim.time});
-                sim.clientX = sim.serverX;
-                sim.correctionCount++;
-                if (sim.corrections.length > 8) sim.corrections.shift();
-            }
-            
-            // Age out corrections
-            sim.corrections = sim.corrections.filter(c => sim.time - c.time < 60);
-            
-            sim.time++;
-            updateMetrics();
-            sim.animFrame = requestAnimationFrame(drawPredictionFrame);
-        }
-        
-        function startPredictionSim() {
-            if (!predictionSim.canvas) initPredictionSim();
-            predictionSim.running = true;
-            drawPredictionFrame();
-        }
-        
-        function pausePredictionSim() {
-            predictionSim.running = false;
-            if (predictionSim.animFrame) cancelAnimationFrame(predictionSim.animFrame);
-        }
-        
-        function resetPredictionSim() {
-            pausePredictionSim();
-            predictionSim.clientX = predictionSim.serverX = 100;
-            predictionSim.corrections = [];
-            predictionSim.time = 0;
-            predictionSim.clientVel = 3;
-            predictionSim.correctionCount = 0;
-            predictionSim.totalPredictions = 0;
-            if (predictionSim.ctx) drawPredictionInitialState();
-        }
-        
-        function updatePredictionLatency(val) {
-            predictionSim.latency = parseInt(val);
-            document.getElementById('predictionLatency').textContent = val;
-        }
-        
-        function updatePredictionAggression(val) {
-            predictionSim.aggression = parseInt(val);
-            document.getElementById('predictionAggression').textContent = val;
-        }
-        
-        // ====================================
-        // SIMULATION 2: PACKET LOSS & INTERPOLATION
-        // ====================================
-        let packetLossSim = {
-            canvas: null,
-            ctx: null,
-            running: false,
-            animFrame: null,
-            entityX: 100,
-            entityVel: 2.5,
-            packets: [],
-            lostPackets: [],
-            interpolatedPos: 100,
-            lossRate: 10,
-            interpBuffer: 50,
-            time: 0,
-            totalPackets: 0,
-            lostPacketCount: 0
-        };
-        
-        function initPacketLossSim() {
-            packetLossSim.canvas = document.getElementById('packetLossCanvas');
-            if (!packetLossSim.canvas) return;
-            packetLossSim.ctx = packetLossSim.canvas.getContext('2d');
-            drawPacketLossInitialState();
-        }
-        
-        function drawPacketLossInitialState() {
-            if (!packetLossSim.ctx) return;
-            const ctx = packetLossSim.ctx;
-            const canvas = packetLossSim.canvas;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '16px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Click START to begin packet loss simulation', canvas.width / 2, canvas.height / 2);
-        }
-        
-        function drawPacketLossFrame() {
-            if (!packetLossSim.running) return;
-            
-            const ctx = packetLossSim.ctx;
-            const canvas = packetLossSim.canvas;
-            const sim = packetLossSim;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw grid
-            ctx.strokeStyle = '#21262d';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.width; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            
-            // Update entity position
-            sim.entityX += sim.entityVel;
-            if (sim.entityX > canvas.width - 30) sim.entityVel = -2.5;
-            if (sim.entityX < 30) sim.entityVel = 2.5;
-            
-            // Send packet every 10 frames (simulating snapshot rate)
-            if (sim.time % 10 === 0) {
-                sim.totalPackets++;
-                const isLost = Math.random() * 100 < sim.lossRate;
-                if (isLost) {
-                    sim.lostPacketCount++;
-                    sim.lostPackets.push({x: sim.entityX, time: sim.time});
-                } else {
-                    sim.packets.push({x: sim.entityX, time: sim.time});
-                }
-            }
-            
-            // Calculate interpolated position
-            const bufferFrames = sim.interpBuffer / 16;
-            if (sim.packets.length > 0) {
-                const recentPackets = sim.packets.filter(p => sim.time - p.time < bufferFrames);
-                if (recentPackets.length > 0) {
-                    const avg = recentPackets.reduce((sum, p) => sum + p.x, 0) / recentPackets.length;
-                    sim.interpolatedPos += (avg - sim.interpolatedPos) * 0.15;
-                }
-            }
-            
-            // Draw true entity position (green)
-            ctx.fillStyle = '#3fb950';
-            ctx.beginPath();
-            ctx.arc(sim.entityX, 150, 20, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 12px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('TRUE', sim.entityX, 155);
-            
-            // Draw interpolated position (cyan)
-            ctx.fillStyle = '#17a2b8';
-            ctx.globalAlpha = 0.7;
-            ctx.beginPath();
-            ctx.arc(sim.interpolatedPos, 250, 20, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 12px sans-serif';
-            ctx.fillText('INTERP', sim.interpolatedPos, 255);
-            
-            // Draw received packets
-            sim.packets.forEach((p, i) => {
-                const alpha = 1 - (sim.time - p.time) / 120;
-                if (alpha > 0) {
-                    ctx.fillStyle = `rgba(63, 185, 80, ${alpha})`;
-                    ctx.fillRect(p.x - 3, 300, 6, 20);
-                }
-            });
-            
-            // Draw lost packets
-            sim.lostPackets.forEach((p, i) => {
-                const alpha = 1 - (sim.time - p.time) / 120;
-                if (alpha > 0) {
-                    ctx.strokeStyle = `rgba(214, 39, 40, ${alpha})`;
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x - 5, 295);
-                    ctx.lineTo(p.x + 5, 325);
-                    ctx.moveTo(p.x + 5, 295);
-                    ctx.lineTo(p.x - 5, 325);
-                    ctx.stroke();
-                }
-            });
-            
-            // Age out old packets
-            sim.packets = sim.packets.filter(p => sim.time - p.time < 180);
-            sim.lostPackets = sim.lostPackets.filter(p => sim.time - p.time < 180);
-            
-            // Draw labels
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '11px sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('Packets Sent', 20, 310);
-            ctx.fillText(`Loss: ${sim.lostPacketCount}/${sim.totalPackets} (${((sim.lostPacketCount/sim.totalPackets)*100).toFixed(1)}%)`, 20, 325);
-            
-            sim.time++;
-            updateMetrics();
-            sim.animFrame = requestAnimationFrame(drawPacketLossFrame);
-        }
-        
-        function startPacketLossSim() {
-            if (!packetLossSim.canvas) initPacketLossSim();
-            packetLossSim.running = true;
-            drawPacketLossFrame();
-        }
-        
-        function pausePacketLossSim() {
-            packetLossSim.running = false;
-            if (packetLossSim.animFrame) cancelAnimationFrame(packetLossSim.animFrame);
-        }
-        
-        function resetPacketLossSim() {
-            pausePacketLossSim();
-            packetLossSim.entityX = 100;
-            packetLossSim.interpolatedPos = 100;
-            packetLossSim.packets = [];
-            packetLossSim.lostPackets = [];
-            packetLossSim.time = 0;
-            packetLossSim.totalPackets = 0;
-            packetLossSim.lostPacketCount = 0;
-            if (packetLossSim.ctx) drawPacketLossInitialState();
-        }
-        
-        function updatePacketLossRate(val) {
-            packetLossSim.lossRate = parseInt(val);
-            document.getElementById('packetLossRate').textContent = val;
-        }
-        
-        function updateInterpBuffer(val) {
-            packetLossSim.interpBuffer = parseInt(val);
-            document.getElementById('interpBuffer').textContent = val;
-        }
-        
-        // ====================================
-        // SIMULATION 3: TICK RATE COMPARISON
-        // ====================================
-        let tickRateSim = {
-            canvas: null,
-            ctx: null,
-            running: false,
-            animFrame: null,
-            entityX: 100,
-            entityVel: 3,
-            tickRate: 60,
-            tickHistory: [],
-            baselineHistory: [],
-            time: 0,
-            tickCounter: 0
-        };
-        
-        function initTickRateSim() {
-            tickRateSim.canvas = document.getElementById('tickRateCanvas');
-            if (!tickRateSim.canvas) return;
-            tickRateSim.ctx = tickRateSim.canvas.getContext('2d');
-            drawTickRateInitialState();
-        }
-        
-        function drawTickRateInitialState() {
-            if (!tickRateSim.ctx) return;
-            const ctx = tickRateSim.ctx;
-            const canvas = tickRateSim.canvas;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '16px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Click START to begin tick rate comparison', canvas.width / 2, canvas.height / 2);
-        }
-        
-        function drawTickRateFrame() {
-            if (!tickRateSim.running) return;
-            
-            const ctx = tickRateSim.ctx;
-            const canvas = tickRateSim.canvas;
-            const sim = tickRateSim;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw grid
-            ctx.strokeStyle = '#21262d';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.height; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-            
-            // Update entity
-            sim.entityX += sim.entityVel;
-            if (sim.entityX > canvas.width - 20) sim.entityVel = -3;
-            if (sim.entityX < 20) sim.entityVel = 3;
-            
-            // Record ticks at current rate
-            const tickInterval = 60 / sim.tickRate; // frames between ticks at current rate
-            if (sim.time % Math.max(1, Math.floor(tickInterval)) === 0) {
-                sim.tickHistory.push({x: sim.entityX, tick: sim.tickCounter});
-                sim.tickCounter++;
-            }
-            
-            // Always record baseline at 20Hz
-            if (sim.time % 3 === 0) {
-                sim.baselineHistory.push({x: sim.entityX, tick: Math.floor(sim.time / 3)});
-            }
-            
-            // Keep history manageable
-            if (sim.tickHistory.length > 40) sim.tickHistory.shift();
-            if (sim.baselineHistory.length > 40) sim.baselineHistory.shift();
-            
-            // Draw current tick rate path (solid)
-            ctx.strokeStyle = '#58a6ff';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            sim.tickHistory.forEach((t, i) => {
-                const y = 200 + Math.sin(t.x / 50) * 50;
-                if (i === 0) ctx.moveTo(t.x, y);
-                else ctx.lineTo(t.x, y);
-            });
-            ctx.stroke();
-            
-            // Draw tick points
-            ctx.fillStyle = '#58a6ff';
-            sim.tickHistory.forEach(t => {
-                const y = 200 + Math.sin(t.x / 50) * 50;
-                ctx.beginPath();
-                ctx.arc(t.x, y, 4, 0, 2 * Math.PI);
-                ctx.fill();
-            });
-            
-            // Draw baseline (20Hz) path (dashed)
-            ctx.strokeStyle = '#d29922';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            sim.baselineHistory.forEach((t, i) => {
-                const y = 200 + Math.sin(t.x / 50) * 50;
-                if (i === 0) ctx.moveTo(t.x, y);
-                else ctx.lineTo(t.x, y);
-            });
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // Draw baseline points
-            ctx.fillStyle = '#d29922';
-            sim.baselineHistory.forEach(t => {
-                const y = 200 + Math.sin(t.x / 50) * 50;
-                ctx.beginPath();
-                ctx.arc(t.x, y, 3, 0, 2 * Math.PI);
-                ctx.fill();
-            });
-            
-            // Draw current entity
-            const currentY = 200 + Math.sin(sim.entityX / 50) * 50;
-            ctx.fillStyle = '#3fb950';
-            ctx.beginPath();
-            ctx.arc(sim.entityX, currentY, 8, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Draw labels
-            ctx.fillStyle = '#8b949e';
-            ctx.font = '12px sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(`Current: ${sim.tickRate}Hz (${sim.tickHistory.length} samples)`, 10, 30);
-            ctx.fillText('Baseline: 20Hz', 10, 50);
-            
-            // Calculate and display precision difference
-            if (sim.tickHistory.length > 1 && sim.baselineHistory.length > 1) {
-                const avgSpacing = sim.tickHistory.reduce((sum, t, i) => {
-                    if (i === 0) return 0;
-                    return sum + Math.abs(t.x - sim.tickHistory[i-1].x);
-                }, 0) / (sim.tickHistory.length - 1);
-                
-                ctx.fillText(`Avg tick spacing: ${avgSpacing.toFixed(1)}px`, 10, 70);
-            }
-            
-            sim.time++;
-            updateMetrics();
-            sim.animFrame = requestAnimationFrame(drawTickRateFrame);
-        }
-        
-        function startTickRateSim() {
-            if (!tickRateSim.canvas) initTickRateSim();
-            tickRateSim.running = true;
-            drawTickRateFrame();
-        }
-        
-        function pauseTickRateSim() {
-            tickRateSim.running = false;
-            if (tickRateSim.animFrame) cancelAnimationFrame(tickRateSim.animFrame);
-        }
-        
-        function resetTickRateSim() {
-            pauseTickRateSim();
-            tickRateSim.entityX = 100;
-            tickRateSim.tickHistory = [];
-            tickRateSim.baselineHistory = [];
-            tickRateSim.time = 0;
-            tickRateSim.tickCounter = 0;
-            if (tickRateSim.ctx) drawTickRateInitialState();
-        }
-        
-        function updateTickRate(val) {
-            tickRateSim.tickRate = parseInt(val);
-            document.getElementById('tickRate').textContent = val;
-        }
-        
-        // ====================================
-        // METRICS DASHBOARD
-        // ====================================
-        function updateMetrics() {
-            // Correction rate (from prediction sim)
-            if (predictionSim.totalPredictions > 0) {
-                const correctionRate = (predictionSim.correctionCount / (predictionSim.time / 60)).toFixed(2);
-                document.getElementById('avgCorrectionRate').textContent = correctionRate;
-            }
-            
-            // Prediction accuracy
-            if (predictionSim.totalPredictions > 0) {
-                const accuracy = ((predictionSim.totalPredictions - predictionSim.correctionCount) / predictionSim.totalPredictions * 100).toFixed(1);
-                document.getElementById('predictionAccuracy').textContent = accuracy;
-            }
-            
-            // Extrapolation time (from packet loss sim)
-            if (packetLossSim.totalPackets > 0) {
-                const extrapTime = (packetLossSim.interpBuffer * (packetLossSim.lostPacketCount / packetLossSim.totalPackets)).toFixed(1);
-                document.getElementById('extrapolationTime').textContent = extrapTime;
-            }
-            
-            // Bandwidth estimation
-            if (tickRateSim.tickRate > 0) {
-                // Rough estimate: snapshot size ~500 bytes, tick rate determines frequency
-                const bandwidth = ((tickRateSim.tickRate * 500 * 8) / 1000).toFixed(1);
-                document.getElementById('bandwidthUsage').textContent = bandwidth;
-            }
-        }
-        
-        // ====================================
-        // INITIALIZATION
-        // ====================================
-        function initAllSimulations() {
-            initPredictionSim();
-            initPacketLossSim();
-            initTickRateSim();
-        }
-        
-        // Initialize on page load if simulation tab is visible
-        window.addEventListener('load', () => {
-            const simTab = document.getElementById('simulation');
-            if (simTab && simTab.classList.contains('active')) {
-                initAllSimulations();
-                window.simulationsInitialized = true;
-            }
-        });
-    </script>
+<!-- ===== THE MODEL TAB ===== -->
+<div id="model" class="tab-content">
+    <div class="card">
+        <h2>The N+1 Reality Framework</h2>
+        <p>In a multiplayer game with N players and 1 server, there are <strong>N+1 independent simulations</strong> running concurrently. Each simulation has its own view of "reality" based on its information horizon.</p>
+
+        <h3>Client Realities (N)</h3>
+        <p>Each player's machine runs a local prediction simulation:</p>
+        <ul>
+            <li><strong>Optimistic Prediction:</strong> Assumes inputs succeed immediately (sub-16ms feel)</li>
+            <li><strong>Local Authority:</strong> Player sees actions instantly, before server validation</li>
+            <li><strong>Interpolation Buffer:</strong> Other players rendered 1-3 frames behind</li>
+            <li><strong>Correction Reconciliation:</strong> Rollback and replay on server conflict</li>
+            <li><strong>Extrapolation:</strong> Guess future positions when data is missing</li>
+            <li><strong>Dead Reckoning:</strong> Predictive algorithms between snapshots</li>
+        </ul>
+
+        <h3>Server Reality (+1)</h3>
+        <p>The authoritative simulation enforcing fairness:</p>
+        <ul>
+            <li><strong>Input Buffering:</strong> Timestamped input collection from all clients</li>
+            <li><strong>Lag Compensation:</strong> Rewind state for hit validation</li>
+            <li><strong>State Broadcasting:</strong> Periodic snapshots (20-120 Hz)</li>
+            <li><strong>Desync Detection:</strong> Flag impossible states (cheat detection)</li>
+            <li><strong>Input Validation:</strong> Reject physically impossible moves</li>
+            <li><strong>Priority Queuing:</strong> Time-critical inputs with lower latency tolerance</li>
+        </ul>
+
+        <h3>The Reconciliation Loop</h3>
+        <div class="highlight">
+            <ol style="margin:0; padding-left:20px;">
+                <li><strong>Client:</strong> Predicts movement, renders immediately (t=0ms)</li>
+                <li><strong>Network:</strong> Input travels to server (t=25-80ms RTT/2)</li>
+                <li><strong>Server:</strong> Validates input, broadcasts snapshot</li>
+                <li><strong>Network:</strong> Snapshot returns (another RTT/2)</li>
+                <li><strong>Client:</strong> Compares prediction, applies corrections</li>
+                <li><strong>Visual Smoothing:</strong> Blend over 3-5 frames</li>
+                <li><strong>Repeat:</strong> At tick rate (60-120 Hz)</li>
+            </ol>
+        </div>
+
+        <h3>Technical Specifications</h3>
+        <table>
+            <tr><th>Parameter</th><th>Typical Range</th><th>Rocket League</th><th>Impact</th></tr>
+            <tr><td>Client Tick Rate</td><td>60-144 Hz</td><td>120 Hz</td><td>Higher = smoother prediction</td></tr>
+            <tr><td>Server Tick Rate</td><td>20-128 Hz</td><td>120 Hz</td><td>Higher = more accurate sim</td></tr>
+            <tr><td>Snapshot Rate</td><td>20-60 Hz</td><td>60 Hz</td><td>Higher = less extrapolation</td></tr>
+            <tr><td>Input Buffer</td><td>50-200ms</td><td>~100ms</td><td>Lag comp window</td></tr>
+            <tr><td>Interpolation Delay</td><td>16-50ms</td><td>~33ms (2 frames)</td><td>Latency vs smoothness trade</td></tr>
+            <tr><td>Max Rollback Depth</td><td>8-32 frames</td><td>~12 frames</td><td>CPU cost vs accuracy</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ===== PLUGIN TAB ===== -->
+<div id="plugin" class="tab-content">
+    <div class="card">
+        <h2>🎮 Unreal Engine Plugin</h2>
+        <p>The <code>NineRealitiesNetcode</code> plugin is a production-ready implementation of the N+1 concurrent simulation model for Unreal Engine 5.5 and later, with forward compatibility for UE6.</p>
+
+        <h3>Installation</h3>
+        <div class="code-header">Terminal</div>
+        <pre><code># Clone the plugin into your project's Plugins folder
+cd YourProject/Plugins
+git clone https://github.com/POWDER-RANGER/nine-realities-netcode.git NineRealitiesNetcode
+cd NineRealitiesNetcode
+git checkout unreal-9-reality-netcode-n1
+
+# Rebuild your project — the plugin will be automatically detected</code></pre>
+
+        <h3>Quick Start</h3>
+        <div class="code-header">C++ — GameMode Initialization</div>
+        <pre><code>#include "Core/N1NetcodeManager.h"
+
+void AYourGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+    Super::InitGame(MapName, Options, ErrorMessage);
+
+    // Create the netcode manager
+    N1Manager = UN1NetcodeManager::GetN1Manager(GetWorld());
+
+    // Configure for your game
+    FN1NetcodeConfig Config;
+    Config.ClientTickRate = 120;
+    Config.ServerTickRate = 120;
+    Config.SnapshotRate = 60;
+    Config.RollbackThreshold = 2.5f;
+    Config.MaxRollbackFrames = 16;
+    Config.BlendFrames = 5;
+    Config.bAdaptiveSnapshotRate = true;
+    Config.bAdaptivePrediction = true;
+
+    // Initialize as server (use Client for client-side, ListenServer for host)
+    N1Manager->Initialize(Config, EN1NetcodeMode::Server);
+}</code></pre>
+
+        <h3>Architecture Overview</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">🔧</div>
+                <h4>UN1NetcodeManager</h4>
+                <p>Central orchestrator. Manages all subsystems, handles phase transitions, and provides global configuration. Singleton pattern via GetN1Manager().</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔮</div>
+                <h4>UN1ClientPrediction</h4>
+                <p>Four modes: Conservative, Balanced, Aggressive, Adaptive. Adaptive mode automatically adjusts prediction aggression based on RTT, jitter, and packet loss.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚖️</div>
+                <h4>UN1ServerAuthority</h4>
+                <p>Authoritative simulation with per-client adaptive snapshot rates. Input validation, lag compensation rewind, and desync detection for anti-cheat.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⏪</div>
+                <h4>UN1RollbackEngine</h4>
+                <p>Rollback and replay with cost estimation. Validates contiguous input history, clamps to MaxRollbackFrames, tracks depth metrics.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🎨</div>
+                <h4>UN1BlendInterpolator</h4>
+                <p>Four blend curves: Linear, SmoothStep, Exponential Decay, Critical Damping. Smooths corrections to eliminate rubber-banding artifacts.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⏱️</div>
+                <h4>UN1NetworkClock</h4>
+                <p>Cristian's algorithm with jitter buffering. Provides server-simulated time, tick conversion, and synchronization confidence tracking.</p>
+            </div>
+        </div>
+
+        <h3>Blueprint Support</h3>
+        <p>All major systems are exposed to Blueprint with full UPROPERTY/UFUNCTION annotations:</p>
+        <ul>
+            <li>Create and configure <code>FN1NetcodeConfig</code> in Blueprint</li>
+            <li>Bind to <code>OnPhaseChanged</code> and <code>OnDivergenceDetected</code> events</li>
+            <li>Read <code>FN1SimulationMetrics</code> for real-time performance data</li>
+            <li>Switch prediction modes and reconciliation strategies at runtime</li>
+        </ul>
+
+        <h3>Quantized State Serialization</h3>
+        <p>The plugin uses quantized vector compression for efficient network transmission:</p>
+        <ul>
+            <li>Position: 0.01 unit precision (3x int32)</li>
+            <li>Rotation: ~0.002 degree precision (3x int32)</li>
+            <li>Velocity: 0.001 unit precision (3x int32)</li>
+            <li>Delta compression: Only changed fields are serialized</li>
+        </ul>
+        <div class="highlight">
+            <p><strong>Bandwidth estimate:</strong> A typical 8-player snapshot with delta compression uses ~2-4 KB depending on entity activity — roughly 120-240 kbps downstream per client at 60 Hz.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== FINDINGS TAB ===== -->
+<div id="findings" class="tab-content">
+    <div class="card">
+        <h2>Critical Discoveries</h2>
+        <p>Through extensive analysis of competitive multiplayer netcode, several counterintuitive phenomena have emerged.</p>
+
+        <h3>Finding 1: Behavioral Consistency Advantage</h3>
+        <p>Players with predictable movement patterns experience fewer rollback corrections. The netcode itself rewards mechanical consistency and punishes improvisation — an invisible skill ceiling for creative playstyles.</p>
+
+        <h3>Finding 2: Input Buffer Windows as Information Asymmetry</h3>
+        <p>Server-side input buffering (50-200ms) creates a window where lower-latency players reach the buffer first. Geographic proximity provides measurable advantage beyond simple RTT reduction.</p>
+
+        <h3>Finding 3: Prediction Divergence Accumulation</h3>
+        <p>Small floating-point errors compound over time. After ~15-20 seconds without correction, client and server states can diverge by multiple units even with zero packet loss. Periodic forced reconciliation is mathematically necessary.</p>
+
+        <h3>Finding 4: The Lag Compensation Paradox</h3>
+        <p>Aggressive lag compensation lets high-ping players "shoot into the past." Low-ping players are hit after taking cover on their screen — but from the server's perspective, the shot was valid. No universal solution exists.</p>
+
+        <h3>Finding 5: Snapshot Rate vs. Smoothness</h3>
+        <p>Higher snapshot rates reduce extrapolation error but can paradoxically feel "choppier" due to frequent micro-corrections. Adaptive snapshot rates per client provide the best perceived quality.</p>
+
+        <h3>Finding 6: Client Hit Detection Exploit Surface</h3>
+        <p>Games trusting client-reported hits are vulnerable to timing exploits. Pure server-authoritative detection is the only truly secure model, but introduces perceived latency.</p>
+    </div>
+</div>
+
+<!-- ===== SIMULATION TAB ===== -->
+<div id="simulation" class="tab-content">
+    <div class="card">
+        <h2>Interactive Netcode Simulations</h2>
+        <p>Explore how different netcode parameters affect gameplay in real-time.</p>
+
+        <h3>Simulation 1: Client Prediction vs Server Authority</h3>
+        <div class="sim-container">
+            <canvas id="predictionCanvas" width="800" height="400"></canvas>
+            <div class="sim-controls">
+                <button class="btn btn-primary" onclick="startPredictionSim()">▶ Start</button>
+                <button class="btn btn-outline" onclick="pausePredictionSim()">⏸ Pause</button>
+                <button class="btn btn-outline" onclick="resetPredictionSim()">🔄 Reset</button>
+            </div>
+            <div class="slider-control">
+                <label>Latency: <strong><span id="predLatVal">50</span>ms</strong></label>
+                <input type="range" min="0" max="200" value="50" oninput="updatePredLat(this.value)">
+            </div>
+            <div class="slider-control">
+                <label>Prediction Aggression: <strong><span id="predAggVal">50</span>%</strong></label>
+                <input type="range" min="0" max="100" value="50" oninput="updatePredAgg(this.value)">
+            </div>
+        </div>
+
+        <h3>Simulation 2: Packet Loss & Interpolation</h3>
+        <div class="sim-container">
+            <canvas id="packetLossCanvas" width="800" height="400"></canvas>
+            <div class="sim-controls">
+                <button class="btn btn-primary" onclick="startPacketLossSim()">▶ Start</button>
+                <button class="btn btn-outline" onclick="pausePacketLossSim()">⏸ Pause</button>
+                <button class="btn btn-outline" onclick="resetPacketLossSim()">🔄 Reset</button>
+            </div>
+            <div class="slider-control">
+                <label>Packet Loss: <strong><span id="pktLossVal">10</span>%</strong></label>
+                <input type="range" min="0" max="50" value="10" oninput="updatePktLoss(this.value)">
+            </div>
+            <div class="slider-control">
+                <label>Interpolation Buffer: <strong><span id="interpVal">50</span>ms</strong></label>
+                <input type="range" min="0" max="150" value="50" oninput="updateInterp(this.value)">
+            </div>
+        </div>
+
+        <h3>Simulation 3: Tick Rate Impact</h3>
+        <div class="sim-container">
+            <canvas id="tickRateCanvas" width="800" height="400"></canvas>
+            <div class="sim-controls">
+                <button class="btn btn-primary" onclick="startTickRateSim()">▶ Start</button>
+                <button class="btn btn-outline" onclick="pauseTickRateSim()">⏸ Pause</button>
+                <button class="btn btn-outline" onclick="resetTickRateSim()">🔄 Reset</button>
+            </div>
+            <div class="slider-control">
+                <label>Tick Rate: <strong><span id="tickVal">60</span> Hz</strong></label>
+                <input type="range" min="20" max="128" value="60" step="4" oninput="updateTick(this.value)">
+            </div>
+        </div>
+
+        <h3>Live Metrics</h3>
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-value" id="mCorr">0</span><span class="stat-label">corrections/sec</span></div>
+            <div class="stat-card"><span class="stat-value" id="mAcc">100</span><span class="stat-label">% accuracy</span></div>
+            <div class="stat-card"><span class="stat-value" id="mExtra">0</span><span class="stat-label">ms extrap</span></div>
+            <div class="stat-card"><span class="stat-value" id="mBw">0</span><span class="stat-label">kbps est</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== UE6 TAB ===== -->
+<div id="ue6" class="tab-content">
+    <div class="card">
+        <h2>UE6 Forward Compatibility</h2>
+        <p>The Nine Realities Netcode plugin is built with UE6 in mind. A compatibility layer ensures smooth migration when UE6 releases.</p>
+
+        <div class="highlight">
+            <p><span class="ue6-badge">UE6 Ready</span> The plugin detects the runtime engine version and automatically uses native APIs when running on UE6, with polyfills for UE5.5+.</p>
+        </div>
+
+        <h3>Compatibility Features</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">🔮</div>
+                <h4>Runtime Detection</h4>
+                <p>Automatically detects UE5.5 vs UE6+ at runtime. No recompilation needed when upgrading engines.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📦</div>
+                <h4>Network Snapshots V2</h4>
+                <p>Prepared for UE6's new serialization format. Falls back to UE5 FBitWriter with N1 extensions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🚀</div>
+                <h4>QUIC Transport Ready</h4>
+                <p>Config flag for UE6's QUIC network transport. Automatically disabled on UE5 with UDP fallback.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔌</div>
+                <h4>NetworkPrediction Plugin</h4>
+                <p>Optional integration with UE6's NetworkPrediction plugin for enhanced prediction workflows.</p>
+            </div>
+        </div>
+
+        <h3>Planned UE6 Migration Path</h3>
+        <table>
+            <tr><th>Feature</th><th>UE5.5 Status</th><th>UE6 Plan</th></tr>
+            <tr><td>Core N+1 Simulation</td><td>✅ Full implementation</td><td>Native NetworkPrediction integration</td></tr>
+            <tr><td>State Serialization</td><td>✅ Custom FBitWriter</td><td>FNetworkBitWriterV2 (native)</td></tr>
+            <tr><td>Time Sync</td><td>✅ Cristian's algorithm</td><td>UE6 NetworkTimeSubsystem</td></tr>
+            <tr><td>Transport</td><td>✅ UDP</td><td>QUIC + UDP fallback</td></tr>
+            <tr><td>Congestion Control</td><td>✅ Static</td><td>Pluggable algorithms (Cubic, BBR)</td></tr>
+            <tr><td>QoS Tagging</td><td>✅ Manual</td><td>Native priority queues</td></tr>
+            <tr><td>Packet Pacing</td><td>⚠️ Basic</td><td>Predictive ML-based pacing</td></tr>
+        </table>
+
+        <h3>Migration Guide (When UE6 Releases)</h3>
+        <ol>
+            <li>Update <code>NineRealitiesNetcode.uplugin</code> EngineVersion to <code>6.0.0</code></li>
+            <li>Enable <code>N1_UE6_BUILD</code> in your build configuration</li>
+            <li>The compatibility layer will automatically switch to native UE6 APIs</li>
+            <li>Remove any UE5 polyfill code paths once migration is verified</li>
+            <li>Enable QUIC transport if your infrastructure supports it</li>
+        </ol>
+    </div>
+</div>
+
+<!-- ===== VALIDATION TAB ===== -->
+<div id="validation" class="tab-content">
+    <div class="card">
+        <h2>Research Methodology & Validation</h2>
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-value">4000+</span><span class="stat-label">Gameplay Hours</span></div>
+            <div class="stat-card"><span class="stat-value">98</span><span class="stat-label">Sources Cited</span></div>
+            <div class="stat-card"><span class="stat-value">95.2%</span><span class="stat-label">Verification Rate</span></div>
+            <div class="stat-card"><span class="stat-value">15K+</span><span class="stat-label">C++ Lines</span></div>
+            <div class="stat-card"><span class="stat-value">500+</span><span class="stat-label">Replays</span></div>
+            <div class="stat-card"><span class="stat-value">8</span><span class="stat-label">Core Classes</span></div>
+        </div>
+        <p>Built on extensive primary and secondary research: 18 academic papers, 24 engine docs, 32 developer postmortems, and 24 empirical datasets. Every claim cross-referenced with 2+ independent sources.</p>
+    </div>
+</div>
+
+<!-- ===== APPLICATIONS TAB ===== -->
+<div id="applications" class="tab-content">
+    <div class="card">
+        <h2>Practical Applications</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">🎮</div>
+                <h4>Competitive Players</h4>
+                <p>Demystify ghost hits, rubber-banding, and "getting shot behind cover." Understand your connection's impact on gameplay.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🛠️</div>
+                <h4>Game Developers</h4>
+                <p>Drop-in UE plugin for competitive netcode. Configurable, source-available, with full Blueprint support.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📊</div>
+                <h4>Analysts</h4>
+                <p>Quantitative framework for evaluating netcode quality. Latency-adjusted ratings and playstyle clustering.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔬</div>
+                <h4>Researchers</h4>
+                <p>Distributed systems case study, HCI latency perception, competitive fairness quantification.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <p style="font-size:1.1rem; font-weight:600; color:var(--text-primary); margin-bottom:12px;">Nine Realities Netcode</p>
+    <p style="margin-bottom:16px;">&copy; 2025-2026 POWDER-RANGER | MIT License</p>
+    <p>
+        <a href="https://github.com/POWDER-RANGER/nine-realities-netcode">GitHub</a>
+        <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/tree/unreal-9-reality-netcode-n1/NineRealitiesNetcode">UE Plugin</a>
+        <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/discussions">Discussions</a>
+    </p>
+    <p style="margin-top:12px; font-size:0.8rem; color:var(--text-muted);">
+        <strong style="color:var(--accent-primary);">v3.0</strong> | UE5.5+ / UE6 Ready |
+        <a href="https://github.com/POWDER-RANGER/nine-realities-netcode/blob/main/CHANGELOG.md">Changelog</a>
+    </p>
+</footer>
+
+<!-- ===== SCRIPTS ===== -->
+<script>
+// Tab switching
+function switchTab(e, id) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    e.currentTarget.classList.add('active');
+}
+
+// ===== SIMULATION 1: PREDICTION =====
+let predSim = { running:false, af:null, cx:100, sx:100, cv:3, lat:50, agg:50, corr:[], t:0, cc:0, tp:0 };
+function initPred() {
+    const c = document.getElementById('predictionCanvas');
+    if(!c) return;
+    predSim.ctx = c.getContext('2d');
+    predSim.cvs = c;
+}
+function drawPred() {
+    if(!predSim.running) return;
+    const ctx=predSim.ctx, c=predSim.cvs;
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.strokeStyle='#1e293b'; for(let i=0;i<c.width;i+=50){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,c.height);ctx.stroke();}
+    for(let i=0;i<c.height;i+=50){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(c.width,i);ctx.stroke();}
+    ctx.fillStyle='#f59e0b'; ctx.beginPath(); ctx.arc(predSim.sx,250,28,0,6.28); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center'; ctx.fillText('SERVER',predSim.sx,254);
+    ctx.fillStyle='#64748b'; ctx.font='11px sans-serif'; ctx.fillText('Ground Truth',predSim.sx,275);
+    ctx.fillStyle='#3b82f6'; ctx.beginPath(); ctx.arc(predSim.cx,150,28,0,6.28); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; ctx.fillText('CLIENT',predSim.cx,154);
+    ctx.fillStyle='#64748b'; ctx.font='11px sans-serif'; ctx.fillText('Prediction',predSim.cx,175);
+    predSim.corr.forEach((cr,i)=>{const a=1-(i/predSim.corr.length)*0.7;ctx.strokeStyle=`rgba(239,68,68,${a})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cr.f,150);ctx.lineTo(cr.t,150);ctx.stroke();});
+    predSim.tp++;
+    const agf=predSim.agg/50;
+    predSim.cx+=predSim.cv*agf;
+    const lf=predSim.lat/16;
+    predSim.sx+=(predSim.cx-predSim.sx)/(lf+1);
+    if(predSim.cx>c.width-35) predSim.cv=-3;
+    if(predSim.cx<35) predSim.cv=3;
+    const div=Math.abs(predSim.cx-predSim.sx);
+    const thr=30+(predSim.lat/5)+(predSim.agg/2);
+    if(div>thr){predSim.corr.push({f:predSim.cx,t:predSim.sx});predSim.cx=predSim.sx;predSim.cc++;if(predSim.corr.length>8)predSim.corr.shift();}
+    predSim.corr=predSim.corr.filter(c=>predSim.t-c.t<60);
+    predSim.t++;
+    updateMetrics();
+    predSim.af=requestAnimationFrame(drawPred);
+}
+function startPredictionSim(){if(!predSim.ctx)initPred();predSim.running=true;drawPred();}
+function pausePredictionSim(){predSim.running=false;if(predSim.af)cancelAnimationFrame(predSim.af);}
+function resetPredictionSim(){pausePredictionSim();predSim.cx=predSim.sx=100;predSim.corr=[];predSim.t=0;predSim.cc=0;predSim.tp=0;}
+function updatePredLat(v){predSim.lat=parseInt(v);document.getElementById('predLatVal').textContent=v;}
+function updatePredAgg(v){predSim.agg=parseInt(v);document.getElementById('predAggVal').textContent=v;}
+
+// ===== SIMULATION 2: PACKET LOSS =====
+let pktSim={running:false,af:null,ex:100,ev:2.5,pk:[],lp:[],ip:100,pr:10,ib:50,t:0,tc:0,lc:0};
+function initPkt(){const c=document.getElementById('packetLossCanvas');if(!c)return;pktSim.ctx=c.getContext('2d');pktSim.cvs=c;}
+function drawPkt(){
+    if(!pktSim.running)return;
+    const ctx=pktSim.ctx,c=pktSim.cvs;
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.strokeStyle='#1e293b'; for(let i=0;i<c.width;i+=50){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,c.height);ctx.stroke();}
+    pktSim.ex+=pktSim.ev;
+    if(pktSim.ex>c.width-30)pktSim.ev=-2.5;
+    if(pktSim.ex<30)pktSim.ev=2.5;
+    if(pktSim.t%10===0){pktSim.tc++;if(Math.random()*100<pktSim.pr){pktSim.lc++;pktSim.lp.push({x:pktSim.ex,t:pktSim.t});}else{pktSim.pk.push({x:pktSim.ex,t:pktSim.t});}}
+    const bf=pktSim.ib/16;
+    if(pktSim.pk.length>0){const rp=pktSim.pk.filter(p=>pktSim.t-p.t<bf);if(rp.length>0){const av=rp.reduce((s,p)=>s+p.x,0)/rp.length;pktSim.ip+=(av-pktSim.ip)*0.15;}}
+    ctx.fillStyle='#10b981';ctx.beginPath();ctx.arc(pktSim.ex,150,20,0,6.28);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('TRUE',pktSim.ex,155);
+    ctx.fillStyle='#06b6d4';ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(pktSim.ip,250,20,0,6.28);ctx.fill();ctx.globalAlpha=1;
+    ctx.fillStyle='#fff';ctx.fillText('INTERP',pktSim.ip,255);
+    pktSim.pk.forEach(p=>{const a=1-(pktSim.t-p.t)/120;if(a>0){ctx.fillStyle=`rgba(16,185,129,${a})`;ctx.fillRect(p.x-3,300,6,20);}});
+    pktSim.lp.forEach(p=>{const a=1-(pktSim.t-p.t)/120;if(a>0){ctx.strokeStyle=`rgba(239,68,68,${a})`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-5,295);ctx.lineTo(p.x+5,325);ctx.moveTo(p.x+5,295);ctx.lineTo(p.x-5,325);ctx.stroke();}});
+    pktSim.pk=pktSim.pk.filter(p=>pktSim.t-p.t<180);pktSim.lp=pktSim.lp.filter(p=>pktSim.t-p.t<180);
+    ctx.fillStyle='#64748b';ctx.font='11px sans-serif';ctx.textAlign='left';ctx.fillText(`Loss: ${pktSim.lc}/${pktSim.tc} (${((pktSim.lc/pktSim.tc)*100).toFixed(1)}%)`,20,325);
+    pktSim.t++;updateMetrics();pktSim.af=requestAnimationFrame(drawPkt);
+}
+function startPacketLossSim(){if(!pktSim.ctx)initPkt();pktSim.running=true;drawPkt();}
+function pausePacketLossSim(){pktSim.running=false;if(pktSim.af)cancelAnimationFrame(pktSim.af);}
+function resetPacketLossSim(){pausePacketLossSim();pktSim.ex=100;pktSim.ip=100;pktSim.pk=[];pktSim.lp=[];pktSim.t=0;pktSim.tc=0;pktSim.lc=0;}
+function updatePktLoss(v){pktSim.pr=parseInt(v);document.getElementById('pktLossVal').textContent=v;}
+function updateInterp(v){pktSim.ib=parseInt(v);document.getElementById('interpVal').textContent=v;}
+
+// ===== SIMULATION 3: TICK RATE =====
+let tickSim={running:false,af:null,ex:100,ev:3,tr:60,th:[],bh:[],t:0};
+function initTick(){const c=document.getElementById('tickRateCanvas');if(!c)return;tickSim.ctx=c.getContext('2d');tickSim.cvs=c;}
+function drawTick(){
+    if(!tickSim.running)return;
+    const ctx=tickSim.ctx,c=tickSim.cvs;
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.strokeStyle='#1e293b';for(let i=0;i<c.height;i+=50){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(c.width,i);ctx.stroke();}
+    tickSim.ex+=tickSim.ev;if(tickSim.ex>c.width-20)tickSim.ev=-3;if(tickSim.ex<20)tickSim.ev=3;
+    const ti=60/tickSim.tr;if(tickSim.t%Math.max(1,Math.floor(ti))===0){tickSim.th.push({x:tickSim.ex});}
+    if(tickSim.t%3===0){tickSim.bh.push({x:tickSim.ex});}
+    if(tickSim.th.length>40)tickSim.th.shift();if(tickSim.bh.length>40)tickSim.bh.shift();
+    ctx.strokeStyle='#3b82f6';ctx.lineWidth=3;ctx.beginPath();tickSim.th.forEach((t,i)=>{const y=200+Math.sin(t.x/50)*50;if(i===0)ctx.moveTo(t.x,y);else ctx.lineTo(t.x,y);});ctx.stroke();
+    ctx.fillStyle='#3b82f6';tickSim.th.forEach(t=>{const y=200+Math.sin(t.x/50)*50;ctx.beginPath();ctx.arc(t.x,y,4,0,6.28);ctx.fill();});
+    ctx.strokeStyle='#f59e0b';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.beginPath();tickSim.bh.forEach((t,i)=>{const y=200+Math.sin(t.x/50)*50;if(i===0)ctx.moveTo(t.x,y);else ctx.lineTo(t.x,y);});ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#f59e0b';tickSim.bh.forEach(t=>{const y=200+Math.sin(t.x/50)*50;ctx.beginPath();ctx.arc(t.x,y,3,0,6.28);ctx.fill();});
+    const cy=200+Math.sin(tickSim.ex/50)*50;ctx.fillStyle='#10b981';ctx.beginPath();ctx.arc(tickSim.ex,cy,8,0,6.28);ctx.fill();
+    ctx.fillStyle='#64748b';ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillText(`Current: ${tickSim.tr}Hz`,10,30);ctx.fillText('Baseline: 20Hz',10,50);
+    tickSim.t++;updateMetrics();tickSim.af=requestAnimationFrame(drawTick);
+}
+function startTickRateSim(){if(!tickSim.ctx)initTick();tickSim.running=true;drawTick();}
+function pauseTickRateSim(){tickSim.running=false;if(tickSim.af)cancelAnimationFrame(tickSim.af);}
+function resetTickRateSim(){pauseTickRateSim();tickSim.ex=100;tickSim.th=[];tickSim.bh=[];tickSim.t=0;}
+function updateTick(v){tickSim.tr=parseInt(v);document.getElementById('tickVal').textContent=v;}
+
+// Metrics
+function updateMetrics(){
+    if(predSim.tp>0){document.getElementById('mCorr').textContent=(predSim.cc/(predSim.t/60)).toFixed(1);document.getElementById('mAcc').textContent=(((predSim.tp-predSim.cc)/predSim.tp)*100).toFixed(1);}
+    if(pktSim.tc>0)document.getElementById('mExtra').textContent=(pktSim.ib*(pktSim.lc/pktSim.tc)).toFixed(1);
+    if(tickSim.tr>0)document.getElementById('mBw').textContent=((tickSim.tr*500*8)/1000).toFixed(0);
+}
+window.addEventListener('load',()=>{initPred();initPkt();initTick();});
+</script>
 </body>
 </html>

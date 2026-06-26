@@ -1,0 +1,50 @@
+{
+	"FileVersion": 3,
+	"Version": 3,
+	"VersionName": "3.0.0",
+	"FriendlyName": "Nine Realities Netcode",
+	"Description": "Production-ready N+1 concurrent simulation framework for competitive multiplayer netcode. Server-authoritative architecture with client-side prediction, rollback-based reconciliation, and UE6 forward compatibility.",
+	"Category": "Networking",
+	"CreatedBy": "POWDER-RANGER (Curtis Charles Farrar)",
+	"CreatedByURL": "https://github.com/POWDER-RANGER",
+	"DocsURL": "https://powder-ranger.github.io/nine-realities-netcode/",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/POWDER-RANGER/nine-realities-netcode/issues",
+	"EngineVersion": "5.5.0",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NineRealitiesNetcode",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac"
+			]
+		},
+		{
+			"Name": "NineRealitiesNetcodeEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "OnlineSubsystem",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemUtils",
+			"Enabled": true
+		}
+	]
+}
