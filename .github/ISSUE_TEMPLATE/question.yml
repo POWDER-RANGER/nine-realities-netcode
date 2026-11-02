@@ -1,0 +1,14 @@
+name: Question
+description: Ask how something works or how to use it
+labels: [question]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What you have tried
